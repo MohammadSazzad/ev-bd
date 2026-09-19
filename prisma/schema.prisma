@@ -18,6 +18,11 @@ enum UserStatus {
   BLOCKED
 }
 
+enum TokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
 enum MediaType {
   PROFILE_IMAGE
   VEHICLE_IMAGE
@@ -35,17 +40,22 @@ model User {
 
   status UserStatus @default(ACTIVE)
 
+  isEmailVerified Boolean   @default(false) @map("is_email_verified")
+  emailVerifiedAt DateTime? @map("email_verified_at")
+
   lastLoginAt DateTime? @map("last_login_at")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  roles UserRole[]
+  roles              UserRole[]
+  verificationTokens VerificationToken[]
 
   profileImageId BigInt?    @unique @map("profile_image_id") @db.BigInt
   profileImage   MediaFile? @relation("UserProfileImage", fields: [profileImageId], references: [id], onDelete: SetNull)
 
   @@index([status])
+  @@index([isEmailVerified])
   @@map("users")
 }
 
@@ -101,4 +111,19 @@ model MediaFile {
   @@index([mediaType])
   @@index([mimeType])
   @@map("media_files")
+}
+
+model VerificationToken {
+  id        BigInt    @id @default(autoincrement()) @db.BigInt
+  userId    BigInt    @map("user_id") @db.BigInt
+  token     String    @unique @db.VarChar(255)
+  type      TokenType
+  expiresAt DateTime  @map("expires_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+  @@index([token])
+  @@map("verification_tokens")
 }
