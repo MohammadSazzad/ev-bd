@@ -128,3 +128,48 @@
     @apply font-sans;
   }
 }
+
+.glow-emerald {
+  box-shadow: 0 0 25px -5px rgba(0, 223, 143, 0.25);
+}
+
+.glow-emerald-sm {
+  box-shadow: 0 0 15px -3px rgba(0, 223, 143, 0.2);
+}
+
+.bg-radial-glow {
+  background: radial-gradient(circle at 50% 0%, rgba(0, 223, 143, 0.08) 0%, rgba(7, 11, 20, 0) 70%);
+}
+
+/* Custom EV Range Slider */
+input[type="range"].accent-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 9999px;
+  background: #1e293b;
+  outline: none;
+}
+
+input[type="range"].accent-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #00DF8F;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(0, 223, 143, 0.6);
+  border: 2px solid #070b14;
+}
+
+input[type="range"].accent-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #00DF8F;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(0, 223, 143, 0.6);
+  border: 2px solid #070b14;
+}
+
