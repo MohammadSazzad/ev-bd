@@ -41,14 +41,14 @@ export function FiltersSidebar({
   };
 
   return (
-    <aside className="w-full rounded-2xl border border-slate-800/80 bg-[#0e1628] p-6 shadow-xl">
-      <div className="flex items-center justify-between pb-4 border-b border-slate-800/60">
-        <h3 className="text-lg font-bold text-white tracking-tight">Filters</h3>
+    <aside className="w-full rounded-2xl border border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#0e1628] p-6 shadow-md dark:shadow-xl transition-colors duration-150">
+      <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800/60">
+        <h3 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">Filters</h3>
         {onReset && (
           <button
             type="button"
             onClick={onReset}
-            className="text-xs font-medium text-slate-400 hover:text-[#00DF8F] transition-colors"
+            className="text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-[#00DF8F] transition-colors"
           >
             Reset
           </button>
@@ -58,7 +58,7 @@ export function FiltersSidebar({
       <div className="space-y-6 pt-5">
         {/* VEHICLE CATEGORY */}
         <div>
-          <h4 className="text-xs font-semibold uppercase tracking-wider text-[#00DF8F] mb-3">
+          <h4 className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-[#00DF8F] mb-3">
             VEHICLE CATEGORY
           </h4>
           <div className="space-y-2.5">
@@ -74,7 +74,7 @@ export function FiltersSidebar({
                     className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-all ${
                       isChecked
                         ? "bg-[#00DF8F] border-[#00DF8F] text-[#070b14]"
-                        : "border-slate-700 bg-slate-900/60 group-hover:border-slate-500"
+                        : "border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60 group-hover:border-slate-400 dark:group-hover:border-slate-500"
                     }`}
                   >
                     {isChecked && <Check className="h-3 w-3 stroke-[3]" />}
@@ -83,8 +83,8 @@ export function FiltersSidebar({
                     onClick={() => toggleCategory(cat)}
                     className={`text-sm transition-colors ${
                       isChecked
-                        ? "text-white font-medium"
-                        : "text-slate-300 group-hover:text-white"
+                        ? "text-slate-900 dark:text-white font-medium"
+                        : "text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white"
                     }`}
                   >
                     {cat}
@@ -97,17 +97,17 @@ export function FiltersSidebar({
 
         {/* BRAND */}
         <div>
-          <h4 className="text-xs font-semibold uppercase tracking-wider text-[#00DF8F] mb-3">
+          <h4 className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-[#00DF8F] mb-3">
             BRAND
           </h4>
           <div className="relative">
             <select
               value={filters.brand}
               onChange={handleBrandChange}
-              className="w-full appearance-none rounded-xl border border-slate-700/80 bg-[#0a101f] px-3.5 py-2.5 text-sm text-slate-200 outline-none transition-all focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/30"
+              className="w-full appearance-none rounded-xl border border-slate-200 dark:border-slate-700/80 bg-slate-50 dark:bg-[#0a101f] px-3.5 py-2.5 text-sm text-slate-800 dark:text-slate-200 outline-none transition-all focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
             >
               {ALL_BRANDS.map((brand) => (
-                <option key={brand} value={brand} className="bg-[#0e1628] text-white">
+                <option key={brand} value={brand} className="bg-white dark:bg-[#0e1628] text-slate-900 dark:text-white">
                   {brand}
                 </option>
               ))}
@@ -118,10 +118,10 @@ export function FiltersSidebar({
 
         {/* PRICE RANGE (BDT) */}
         <div>
-          <h4 className="text-xs font-semibold uppercase tracking-wider text-[#00DF8F] mb-3">
+          <h4 className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-[#00DF8F] mb-3">
             PRICE RANGE (BDT)
           </h4>
-          <div className="flex items-center justify-between text-xs text-slate-400 mb-2 font-mono">
+          <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mb-2 font-mono">
             <span>৳100K</span>
             <span>
               {filters.maxPrice >= 10000000
@@ -142,10 +142,10 @@ export function FiltersSidebar({
 
         {/* REAL-WORLD RANGE */}
         <div>
-          <h4 className="text-xs font-semibold uppercase tracking-wider text-[#00DF8F] mb-3">
+          <h4 className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-[#00DF8F] mb-3">
             REAL-WORLD RANGE
           </h4>
-          <div className="text-xs text-slate-400 mb-2 font-mono">
+          <div className="text-xs text-slate-500 dark:text-slate-400 mb-2 font-mono">
             Min: {filters.minRange} km
           </div>
           <input

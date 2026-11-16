@@ -7,22 +7,22 @@ export function PartnerBanner() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Link
           href="/showrooms?type=importer"
-          className="group relative flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-emerald-500/30 bg-[#091624] px-6 py-5 shadow-xl transition-all duration-300 hover:border-emerald-500/60 hover:bg-[#0c1c2e] hover:shadow-emerald-950/20"
+          className="group relative flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-emerald-200 dark:border-emerald-500/30 bg-emerald-50/70 dark:bg-[#091624] px-6 py-5 shadow-md dark:shadow-xl transition-all duration-300 hover:border-emerald-400 dark:hover:border-emerald-500/60 hover:bg-emerald-100/60 dark:hover:bg-[#0c1c2e]"
         >
           {/* Left Icon & Text */}
           <div className="flex items-center gap-4 text-center sm:text-left">
-            <div className="hidden sm:flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-950/60 border border-emerald-500/30 text-[#00DF8F] group-hover:scale-105 transition-transform">
-              <Handshake className="h-6 w-6 text-[#00DF8F]" />
+            <div className="hidden sm:flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-[#00DF8F] group-hover:scale-105 transition-transform">
+              <Handshake className="h-6 w-6 text-emerald-700 dark:text-[#00DF8F]" />
             </div>
 
-            <p className="text-sm sm:text-base text-slate-200 leading-snug">
-              <span className="font-bold text-white">Importing an EV?</span>{" "}
+            <p className="text-sm sm:text-base text-slate-700 dark:text-slate-200 leading-snug">
+              <span className="font-bold text-slate-900 dark:text-white">Importing an EV?</span>{" "}
               Partner with verified importers on VoltBD for customs, tax, and registration clearance.
             </p>
           </div>
 
           {/* Right Action indicator */}
-          <div className="flex shrink-0 items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#00DF8F] group-hover:translate-x-1 transition-transform">
+          <div className="flex shrink-0 items-center gap-1.5 text-xs sm:text-sm font-semibold text-emerald-700 dark:text-[#00DF8F] group-hover:translate-x-1 transition-transform">
             <span>Learn more</span>
             <ArrowRight className="h-4 w-4" />
           </div>

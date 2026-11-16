@@ -41,7 +41,6 @@ export function CatalogView() {
       if (
         filters.categories.length > 0 &&
         !filters.categories.includes(vehicle.category) &&
-        // If only Electric Cars checked in initial mockup view, also include Super Soco TC if user wants reference view
         vehicle.id !== "super-soco-tc"
       ) {
         return false;
@@ -103,14 +102,14 @@ export function CatalogView() {
         {/* Right Column: Vehicle Cards List (8 cols on lg) */}
         <div className="lg:col-span-8 space-y-8">
           {filteredVehicles.length === 0 ? (
-            <div className="rounded-2xl border border-slate-800 bg-[#0e1628] p-12 text-center">
-              <p className="text-base text-slate-300">
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0e1628] p-12 text-center shadow-sm">
+              <p className="text-base text-slate-700 dark:text-slate-300">
                 No electric vehicles match your selected filter criteria.
               </p>
               <button
                 type="button"
                 onClick={handleResetFilters}
-                className="mt-4 rounded-xl bg-[#00DF8F] px-4 py-2 text-sm font-semibold text-[#070b14] hover:bg-[#00DF8F]/90 transition-all"
+                className="mt-4 rounded-xl bg-[#00DF8F] px-4 py-2 text-sm font-semibold text-[#070b14] hover:bg-[#00DF8F]/90 transition-all shadow-sm"
               >
                 Reset Filters
               </button>
@@ -130,11 +129,11 @@ export function CatalogView() {
 
       {/* Floating Compare Notification Bar when vehicles are selected */}
       {comparedIds.length > 0 && (
-        <div className="fixed bottom-6 right-6 z-40 flex items-center gap-4 rounded-2xl border border-emerald-500/40 bg-[#0e1628]/95 px-5 py-3 shadow-2xl backdrop-blur-md">
-          <div className="flex items-center gap-2 text-sm text-slate-200">
-            <Scale className="h-4 w-4 text-[#00DF8F]" />
+        <div className="fixed bottom-6 right-6 z-40 flex items-center gap-4 rounded-2xl border border-emerald-300 dark:border-emerald-500/40 bg-white/95 dark:bg-[#0e1628]/95 px-5 py-3 shadow-2xl backdrop-blur-md">
+          <div className="flex items-center gap-2 text-sm text-slate-800 dark:text-slate-200">
+            <Scale className="h-4 w-4 text-emerald-600 dark:text-[#00DF8F]" />
             <span>
-              <strong className="text-white">{comparedIds.length}</strong> vehicle
+              <strong className="text-slate-900 dark:text-white">{comparedIds.length}</strong> vehicle
               {comparedIds.length > 1 ? "s" : ""} selected
             </span>
           </div>

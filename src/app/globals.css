@@ -2,7 +2,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *, .dark, .dark *));
 
 @theme inline {
   --color-background: var(--background);
@@ -147,8 +147,12 @@ input[type="range"].accent-slider {
   appearance: none;
   height: 6px;
   border-radius: 9999px;
-  background: #1e293b;
+  background: #e2e8f0;
   outline: none;
+}
+
+:is(.dark, .dark *) input[type="range"].accent-slider {
+  background: #1e293b;
 }
 
 input[type="range"].accent-slider::-webkit-slider-thumb {
@@ -160,7 +164,11 @@ input[type="range"].accent-slider::-webkit-slider-thumb {
   background: #00DF8F;
   cursor: pointer;
   box-shadow: 0 0 10px rgba(0, 223, 143, 0.6);
-  border: 2px solid #070b14;
+  border: 2px solid #ffffff;
+}
+
+:is(.dark, .dark *) input[type="range"].accent-slider::-webkit-slider-thumb {
+  border-color: #070b14;
 }
 
 input[type="range"].accent-slider::-moz-range-thumb {
@@ -170,6 +178,10 @@ input[type="range"].accent-slider::-moz-range-thumb {
   background: #00DF8F;
   cursor: pointer;
   box-shadow: 0 0 10px rgba(0, 223, 143, 0.6);
-  border: 2px solid #070b14;
+  border: 2px solid #ffffff;
+}
+
+:is(.dark, .dark *) input[type="range"].accent-slider::-moz-range-thumb {
+  border-color: #070b14;
 }
 

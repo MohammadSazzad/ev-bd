@@ -39,21 +39,21 @@ function YouTubeIcon(props: React.SVGProps<SVGSVGElement>) {
 
 export function Footer() {
   return (
-    <footer className="mt-16 border-t border-slate-800/80 bg-[#070b14] pt-14 pb-12">
+    <footer className="mt-16 border-t border-slate-200 dark:border-slate-800/80 bg-slate-100/90 dark:bg-[#070b14] pt-14 pb-12 transition-colors duration-150">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-10">
           {/* Brand & Tagline - Spans 2 columns */}
           <div className="md:col-span-2">
             <Link href="/" className="flex items-center gap-2 group">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-950/60 border border-emerald-500/30 text-[#00DF8F]">
-                <Zap className="h-5 w-5 fill-[#00DF8F] text-[#00DF8F]" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-500/30 text-emerald-600 dark:text-[#00DF8F]">
+                <Zap className="h-5 w-5 fill-[#00DF8F] text-emerald-600 dark:text-[#00DF8F]" />
               </div>
-              <span className="text-xl font-bold tracking-tight text-white">
-                Volt<span className="text-[#00DF8F]">BD</span>
+              <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+                Volt<span className="text-emerald-600 dark:text-[#00DF8F]">BD</span>
               </span>
             </Link>
 
-            <p className="mt-4 max-w-sm text-sm text-slate-400 leading-relaxed">
+            <p className="mt-4 max-w-sm text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
               Bangladesh&apos;s unified electric vehicle specification directory
               and predictive battery health assessment platform.
             </p>
@@ -61,7 +61,7 @@ export function Footer() {
 
           {/* Platform Links */}
           <div>
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-white mb-4">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-900 dark:text-white mb-4">
               PLATFORM
             </h4>
             <ul className="space-y-2.5">
@@ -69,7 +69,7 @@ export function Footer() {
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-sm text-slate-400 hover:text-white transition-colors"
+                    className="text-sm text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -80,7 +80,7 @@ export function Footer() {
 
           {/* Ecosystem Links */}
           <div>
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-white mb-4">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-900 dark:text-white mb-4">
               ECOSYSTEM
             </h4>
             <ul className="space-y-2.5">
@@ -88,7 +88,7 @@ export function Footer() {
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-sm text-slate-400 hover:text-white transition-colors"
+                    className="text-sm text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -99,15 +99,15 @@ export function Footer() {
 
           {/* Follow Us */}
           <div>
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-white mb-4">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-900 dark:text-white mb-4">
               FOLLOW US
             </h4>
-            <div className="flex items-center gap-4 text-slate-400">
+            <div className="flex items-center gap-4 text-slate-500 dark:text-slate-400">
               <a
                 href="https://facebook.com"
                 target="_blank"
                 rel="noreferrer"
-                className="hover:text-[#00DF8F] transition-colors"
+                className="hover:text-emerald-600 dark:hover:text-[#00DF8F] transition-colors"
                 aria-label="Follow VoltBD on Facebook"
               >
                 <FacebookIcon className="h-5 w-5" />
@@ -116,7 +116,7 @@ export function Footer() {
                 href="https://twitter.com"
                 target="_blank"
                 rel="noreferrer"
-                className="hover:text-[#00DF8F] transition-colors"
+                className="hover:text-emerald-600 dark:hover:text-[#00DF8F] transition-colors"
                 aria-label="Follow VoltBD on X (Twitter)"
               >
                 <TwitterIcon className="h-5 w-5" />
@@ -125,7 +125,7 @@ export function Footer() {
                 href="https://youtube.com"
                 target="_blank"
                 rel="noreferrer"
-                className="hover:text-[#00DF8F] transition-colors"
+                className="hover:text-emerald-600 dark:hover:text-[#00DF8F] transition-colors"
                 aria-label="Subscribe to VoltBD on YouTube"
               >
                 <YouTubeIcon className="h-5 w-5" />
@@ -135,7 +135,7 @@ export function Footer() {
         </div>
 
         {/* Bottom Legal Row */}
-        <div className="mt-12 pt-8 border-t border-slate-800/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+        <div className="mt-12 pt-8 border-t border-slate-200 dark:border-slate-800/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <p>
             © 2026 VoltBD. All rights reserved. Registered EV Directory Bangladesh.
           </p>
@@ -143,13 +143,13 @@ export function Footer() {
           <div className="flex items-center gap-6">
             <Link
               href="/privacy-policy"
-              className="hover:text-slate-300 transition-colors"
+              className="hover:text-slate-800 dark:hover:text-slate-300 transition-colors"
             >
               Privacy Policy
             </Link>
             <Link
               href="/terms-of-service"
-              className="hover:text-slate-300 transition-colors"
+              className="hover:text-slate-800 dark:hover:text-slate-300 transition-colors"
             >
               Terms of Service
             </Link>
