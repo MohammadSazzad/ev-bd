@@ -1,5 +1,6 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
 import { Sun, Moon, Monitor } from "lucide-react";
 import { useTheme, Theme } from "./theme-provider";
 
@@ -7,8 +8,17 @@ interface ThemeToggleProps {
   showLabels?: boolean;
 }
 
+const emptySubscribe = () => () => {};
+
 export function ThemeToggle({ showLabels = false }: ThemeToggleProps) {
   const { theme, setTheme } = useTheme();
+
+  // Safely detect client mount without setState in effect or hydration mismatch
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
 
   const options: { value: Theme; label: string; icon: typeof Sun }[] = [
     { value: "light", label: "Light", icon: Sun },
@@ -21,7 +31,7 @@ export function ThemeToggle({ showLabels = false }: ThemeToggleProps) {
       <div className="flex w-full items-center gap-1 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 p-1">
         {options.map((opt) => {
           const Icon = opt.icon;
-          const isSelected = theme === opt.value;
+          const isSelected = mounted && theme === opt.value;
           return (
             <button
               key={opt.value}
@@ -50,7 +60,7 @@ export function ThemeToggle({ showLabels = false }: ThemeToggleProps) {
     >
       {options.map((opt) => {
         const Icon = opt.icon;
-        const isSelected = theme === opt.value;
+        const isSelected = mounted && theme === opt.value;
         return (
           <button
             key={opt.value}
