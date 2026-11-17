@@ -4,6 +4,8 @@ import { useState, useMemo } from "react";
 import { Search } from "lucide-react";
 import { EV_BRANDS, EVBrand } from "@/lib/data/brands";
 import { BrandCard } from "./brand-card";
+import { GoogleAdSlot } from "@/components/ads/google-ad-slot";
+import { ADS_CONFIG } from "@/lib/config/ads";
 
 export function BrandsView() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -58,6 +60,14 @@ export function BrandsView() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Bottom Leaderboard Ad Slot */}
+      <div className="mt-10 sm:mt-12">
+        <GoogleAdSlot
+          format="horizontal-banner"
+          slotId={ADS_CONFIG.slots.brandsBottom}
+        />
       </div>
     </div>
   );

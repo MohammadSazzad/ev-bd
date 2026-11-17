@@ -57,7 +57,7 @@ export function Navbar() {
           <ThemeToggle />
 
           <Link
-            href="/api/auth/signin"
+            href="/login"
             className="inline-flex items-center justify-center rounded-lg bg-[#00DF8F] px-4 py-1.5 text-sm font-semibold text-[#070b14] transition-all hover:bg-[#00DF8F]/90 active:scale-95 shadow-sm shadow-emerald-500/20"
           >
             Login
@@ -109,7 +109,7 @@ export function Navbar() {
               <ThemeToggle showLabels />
             </div>
             <Link
-              href="/api/auth/signin"
+              href="/login"
               onClick={() => setMobileMenuOpen(false)}
               className="flex w-full items-center justify-center rounded-lg bg-[#00DF8F] px-4 py-2.5 text-base font-semibold text-[#070b14] hover:bg-[#00DF8F]/90 shadow-sm"
             >

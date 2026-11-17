@@ -24,19 +24,25 @@ export function VehicleCard({
 
   return (
     <div className="group relative overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#0e1628] shadow-lg dark:shadow-2xl transition-all duration-300 hover:border-emerald-500/40">
-      {/* Vehicle Image Banner */}
+      {/* Vehicle Image Banner - Clickable link to details */}
       <div className="relative h-64 sm:h-80 md:h-96 w-full overflow-hidden bg-slate-900">
-        <Image
-          src={currentImage}
-          alt={`${vehicle.brand} ${vehicle.name}`}
-          fill
-          className="object-cover object-center transition-transform duration-500 group-hover:scale-102"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 900px"
-          priority
-        />
+        <Link
+          href={`/vehicles/${vehicle.id}`}
+          className="absolute inset-0 z-0 block cursor-pointer"
+          aria-label={`View ${vehicle.name} details`}
+        >
+          <Image
+            src={currentImage}
+            alt={`${vehicle.brand} ${vehicle.name}`}
+            fill
+            className="object-cover object-center transition-transform duration-500 group-hover:scale-102"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 900px"
+            priority
+          />
 
-        {/* Ambient Dark Gradient on bottom of image */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent dark:from-[#0e1628] dark:via-[#0e1628]/20" />
+          {/* Ambient Dark Gradient on bottom of image */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent dark:from-[#0e1628] dark:via-[#0e1628]/20" />
+        </Link>
 
         {/* Pagination Pills [ 1 ] [ 2 ] [ 3 ] */}
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10">
@@ -45,6 +51,7 @@ export function VehicleCard({
               key={idx}
               type="button"
               onClick={(e) => {
+                e.preventDefault();
                 e.stopPropagation();
                 setActiveImageIndex(idx);
               }}

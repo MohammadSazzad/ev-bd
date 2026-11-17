@@ -6,6 +6,8 @@ import { WhyVoltBDSection } from "@/components/home/why-voltbd-section";
 import { NewsGuidesSection } from "@/components/home/news-guides-section";
 import { PartnerBanner } from "@/components/home/partner-banner";
 import { Footer } from "@/components/layout/footer";
+import { GoogleAdSlot } from "@/components/ads/google-ad-slot";
+import { ADS_CONFIG } from "@/lib/config/ads";
 
 export default function Home() {
   return (
@@ -17,6 +19,15 @@ export default function Home() {
         <CategoriesSection />
         <PopularVehiclesSection />
         <WhyVoltBDSection />
+
+        {/* Non-intrusive Section Break Leaderboard Ad */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-8 sm:my-10">
+          <GoogleAdSlot
+            format="horizontal-banner"
+            slotId={ADS_CONFIG.slots.homeLeaderboard}
+          />
+        </div>
+
         <NewsGuidesSection />
         <PartnerBanner />
       </main>

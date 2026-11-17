@@ -7,6 +7,8 @@ import { FiltersSidebar, FilterState } from "./filters-sidebar";
 import { VehicleCard } from "./vehicle-card";
 import { CatalogHeader, SortOption } from "./catalog-header";
 import { ArrowRight, Scale } from "lucide-react";
+import { GoogleAdSlot } from "@/components/ads/google-ad-slot";
+import { ADS_CONFIG } from "@/lib/config/ads";
 
 export function CatalogView() {
   const [filters, setFilters] = useState<FilterState>({
@@ -91,11 +93,15 @@ export function CatalogView() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Column: Filters Sidebar (4 cols on lg) */}
-        <div className="lg:col-span-4">
+        <div className="lg:col-span-4 space-y-6">
           <FiltersSidebar
             filters={filters}
             onChange={setFilters}
             onReset={handleResetFilters}
+          />
+          <GoogleAdSlot
+            format="sidebar-rect"
+            slotId={ADS_CONFIG.slots.catalogSidebar}
           />
         </div>
 

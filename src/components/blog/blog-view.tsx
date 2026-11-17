@@ -7,6 +7,8 @@ import { FeaturedCard } from "./featured-card";
 import { BlogImporterCallout } from "./blog-importer-callout";
 import { PostCard } from "./post-card";
 import { Pagination } from "./pagination";
+import { GoogleAdSlot } from "@/components/ads/google-ad-slot";
+import { ADS_CONFIG } from "@/lib/config/ads";
 
 export function BlogView() {
   const [activeCategory, setActiveCategory] = useState<BlogCategory>("All Posts");
@@ -54,6 +56,14 @@ export function BlogView() {
         ) : (
           filteredPosts.map((post) => <PostCard key={post.id} post={post} />)
         )}
+      </div>
+
+      {/* Editorial Leaderboard Ad Slot */}
+      <div className="my-8">
+        <GoogleAdSlot
+          format="horizontal-banner"
+          slotId={ADS_CONFIG.slots.blogInFeed}
+        />
       </div>
 
       {/* Pagination Controls [ 1 ] [ 2 ] [ 3 ] */}

@@ -46,8 +46,12 @@ export function PopularVehiclesSection() {
 
         {/* Featured Vehicle Wide Card */}
         <div className="group relative overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#0e1628] shadow-xl dark:shadow-2xl transition-all duration-300 hover:border-emerald-500/40">
-          {/* Vehicle Image Banner */}
-          <div className="relative h-64 sm:h-80 md:h-96 w-full overflow-hidden bg-slate-900">
+          {/* Vehicle Image Banner - Clickable */}
+          <Link
+            href={`/vehicles/${activeVehicle.id}`}
+            className="relative block h-64 sm:h-80 md:h-96 w-full overflow-hidden bg-slate-900 cursor-pointer"
+            aria-label={`View ${activeVehicle.name} full details`}
+          >
             <Image
               src={activeVehicle.imageUrl}
               alt={activeVehicle.name}
@@ -63,15 +67,20 @@ export function PopularVehiclesSection() {
                 {activeVehicle.category}
               </span>
             </div>
-          </div>
+          </Link>
 
           {/* Vehicle Details Bar */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between p-6 sm:p-7 gap-6 border-t border-slate-100 dark:border-slate-800/60 bg-white dark:bg-[#0e1628]">
             <div>
               <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-                {activeVehicle.name}
                 <Link
-                  href={`/vehicles?vehicle=${activeVehicle.id}`}
+                  href={`/vehicles/${activeVehicle.id}`}
+                  className="hover:text-emerald-600 dark:hover:text-[#00DF8F] transition-colors"
+                >
+                  {activeVehicle.name}
+                </Link>
+                <Link
+                  href={`/vehicles/${activeVehicle.id}`}
                   className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 hover:text-emerald-600 dark:hover:text-[#00DF8F]"
                   aria-label={`View ${activeVehicle.name} details`}
                 >
@@ -118,10 +127,10 @@ export function PopularVehiclesSection() {
 
               <div>
                 <Link
-                  href={`/vehicles?vehicle=${activeVehicle.id}`}
+                  href={`/vehicles/${activeVehicle.id}`}
                   className="inline-flex items-center justify-center rounded-xl bg-slate-100 hover:bg-[#00DF8F] hover:text-[#070b14] text-slate-800 border border-slate-200 dark:bg-slate-800/80 dark:hover:bg-[#00DF8F] dark:hover:text-[#070b14] dark:border-slate-700/60 dark:text-slate-200 px-4 py-2 text-xs sm:text-sm font-semibold transition-all shadow-sm"
                 >
-                  View Specs
+                  View Details
                 </Link>
               </div>
             </div>

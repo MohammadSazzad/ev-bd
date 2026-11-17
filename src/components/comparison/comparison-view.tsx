@@ -2,6 +2,8 @@
 
 import { useSearchParams } from "next/navigation";
 import { ComparisonMatrix } from "./comparison-matrix";
+import { GoogleAdSlot } from "@/components/ads/google-ad-slot";
+import { ADS_CONFIG } from "@/lib/config/ads";
 
 export function ComparisonView() {
   const searchParams = useSearchParams();
@@ -25,6 +27,14 @@ export function ComparisonView() {
 
       {/* Comparison Matrix Table */}
       <ComparisonMatrix initialVehicleIds={initialVehicleIds} />
+
+      {/* Bottom Leaderboard Ad Slot */}
+      <div className="mt-10 sm:mt-12">
+        <GoogleAdSlot
+          format="horizontal-banner"
+          slotId={ADS_CONFIG.slots.compareBottom}
+        />
+      </div>
     </div>
   );
 }

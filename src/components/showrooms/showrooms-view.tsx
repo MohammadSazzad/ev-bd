@@ -5,6 +5,8 @@ import { VERIFIED_SHOWROOMS, Showroom } from "@/lib/data/showrooms";
 import { ShowroomFilters } from "./showroom-filters";
 import { ShowroomCard } from "./showroom-card";
 import { InteractiveMap } from "./interactive-map";
+import { GoogleAdSlot } from "@/components/ads/google-ad-slot";
+import { ADS_CONFIG } from "@/lib/config/ads";
 
 export function ShowroomsView() {
   const [selectedDivision, setSelectedDivision] = useState("Dhaka Division");
@@ -80,6 +82,14 @@ export function ShowroomsView() {
             onSelectPin={setSelectedShowroomId}
           />
         </div>
+      </div>
+
+      {/* Bottom Leaderboard Ad Slot */}
+      <div className="mt-10 sm:mt-12">
+        <GoogleAdSlot
+          format="horizontal-banner"
+          slotId={ADS_CONFIG.slots.brandsBottom}
+        />
       </div>
     </div>
   );

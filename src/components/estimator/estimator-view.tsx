@@ -8,6 +8,8 @@ import {
 } from "@/lib/data/estimator";
 import { EstimatorInputs } from "./estimator-inputs";
 import { EstimatorResults } from "./estimator-results";
+import { GoogleAdSlot } from "@/components/ads/google-ad-slot";
+import { ADS_CONFIG } from "@/lib/config/ads";
 
 export function EstimatorView() {
   const [modelId, setModelId] = useState("byd-atto-3");
@@ -87,6 +89,14 @@ export function EstimatorView() {
           <div className="lg:col-span-7">
             <EstimatorResults result={result} isSimulating={isSimulating} />
           </div>
+        </div>
+
+        {/* Bottom Leaderboard Ad Slot */}
+        <div className="mt-10 sm:mt-12">
+          <GoogleAdSlot
+            format="horizontal-banner"
+            slotId={ADS_CONFIG.slots.estimatorBottom}
+          />
         </div>
       </div>
     </div>
