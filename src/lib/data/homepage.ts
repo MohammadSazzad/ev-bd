@@ -51,7 +51,7 @@ export const NAV_ITEMS: NavItem[] = [
   { label: "Vehicles", href: "/vehicles" },
   { label: "Compare", href: "/compare" },
   { label: "Battery Estimator", href: "/battery-estimator" },
-  { label: "Brands", href: "/catalogue?tab=brands" },
+  { label: "Brands", href: "/brands" },
   { label: "Showrooms", href: "/showrooms" },
   { label: "Blog", href: "/blog" },
 ];
@@ -198,5 +198,5 @@ export const FOOTER_PLATFORM_LINKS = [
 export const FOOTER_ECOSYSTEM_LINKS = [
   { label: "EV Showrooms", href: "/showrooms" },
   { label: "Charging Network", href: "/charging-network" },
-  { label: "EV Brands", href: "/catalogue?tab=brands" },
+  { label: "EV Brands", href: "/brands" },
 ];
