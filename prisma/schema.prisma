@@ -30,6 +30,57 @@ enum MediaType {
   BATTERY_IMAGE
   BRAND_LOGO
   SPONSORED_LISTING_IMAGE
+  ARTICLE_IMAGE
+  ARTICLE_INLINE_IMAGE
+}
+
+enum PublicationStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum VehicleStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum VehicleCategoryIcon {
+  CAR
+  BIKE
+  SCOOTER
+  CYCLE
+}
+
+enum VehicleMediaRole {
+  MAIN
+  INTERIOR
+  REAR
+  BATTERY
+  GALLERY
+}
+
+enum ShowroomType {
+  SHOWROOM
+  IMPORTER
+  DEALERSHIP
+  SERVICE_CENTER
+}
+
+enum ShowroomMediaRole {
+  COVER
+  GALLERY
+}
+
+enum ArticleMediaRole {
+  COVER
+  INLINE
+}
+
+enum ArticleCategoryStatus {
+  ACTIVE
+  INACTIVE
 }
 
 model User {
@@ -50,6 +101,7 @@ model User {
 
   roles              UserRole[]
   verificationTokens VerificationToken[]
+  authoredArticles   Article[]           @relation("ArticleAuthor")
 
   profileImageId BigInt?    @unique @map("profile_image_id") @db.BigInt
   profileImage   MediaFile? @relation("UserProfileImage", fields: [profileImageId], references: [id], onDelete: SetNull)
@@ -108,6 +160,11 @@ model MediaFile {
 
   profileUser User? @relation("UserProfileImage")
 
+  brandLogo     Brand?          @relation("BrandLogo")
+  vehicleMedia  VehicleMedia[]
+  showroomMedia ShowroomMedia[]
+  articleMedia  ArticleMedia[]
+
   @@index([mediaType])
   @@index([mimeType])
   @@map("media_files")
@@ -126,4 +183,241 @@ model VerificationToken {
   @@index([userId, type])
   @@index([token])
   @@map("verification_tokens")
+}
+
+model Brand {
+  id          BigInt  @id @default(autoincrement()) @db.BigInt
+  name        String  @db.VarChar(120)
+  slug        String  @unique @db.VarChar(140)
+  origin      String? @db.VarChar(120)
+  category    String? @db.VarChar(160)
+  description String? @db.Text
+
+  status      PublicationStatus @default(PUBLISHED)
+  logoMediaId BigInt?           @unique @map("logo_media_id") @db.BigInt
+  logoMedia   MediaFile?        @relation("BrandLogo", fields: [logoMediaId], references: [id], onDelete: SetNull)
+
+  vehicles  Vehicle[]
+  showrooms ShowroomBrand[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@map("brands")
+}
+
+model VehicleCategory {
+  id          BigInt              @id @default(autoincrement()) @db.BigInt
+  name        String              @db.VarChar(100)
+  slug        String              @unique @db.VarChar(120)
+  description String?             @db.Text
+  icon        VehicleCategoryIcon
+  status      PublicationStatus   @default(PUBLISHED)
+
+  vehicles Vehicle[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@map("vehicle_categories")
+}
+
+model Vehicle {
+  id         BigInt  @id @default(autoincrement()) @db.BigInt
+  name       String  @db.VarChar(160)
+  slug       String  @unique @db.VarChar(180)
+  brandId    BigInt  @map("brand_id") @db.BigInt
+  categoryId BigInt  @map("category_id") @db.BigInt
+  priceBdt   Decimal @map("price_bdt") @db.Decimal(14, 2)
+
+  status     VehicleStatus @default(DRAFT)
+  isFeatured Boolean       @default(false) @map("is_featured")
+  isPopular  Boolean       @default(false) @map("is_popular")
+
+  brand    Brand                 @relation(fields: [brandId], references: [id], onDelete: Restrict)
+  category VehicleCategory       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  specs    VehicleSpecification?
+  media    VehicleMedia[]
+  details  VehicleDetailItem[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([brandId])
+  @@index([categoryId])
+  @@index([status, isFeatured])
+  @@index([priceBdt])
+  @@map("vehicles")
+}
+
+model VehicleSpecification {
+  id                   BigInt   @id @default(autoincrement()) @db.BigInt
+  vehicleId            BigInt   @unique @map("vehicle_id") @db.BigInt
+  batteryCapacityKwh   Decimal? @map("battery_capacity_kwh") @db.Decimal(8, 3)
+  batteryVoltage       Decimal? @map("battery_voltage") @db.Decimal(8, 2)
+  batteryAmpHours      Decimal? @map("battery_amp_hours") @db.Decimal(8, 2)
+  batteryChemistry     String?  @map("battery_chemistry") @db.VarChar(120)
+  realWorldRangeKm     Decimal? @map("real_world_range_km") @db.Decimal(8, 2)
+  motorPowerKw         Decimal? @map("motor_power_kw") @db.Decimal(8, 2)
+  topSpeedKmh          Decimal? @map("top_speed_kmh") @db.Decimal(8, 2)
+  accelerationSeconds  Decimal? @map("acceleration_seconds") @db.Decimal(6, 2)
+  acChargingHours      Decimal? @map("ac_charging_hours") @db.Decimal(6, 2)
+  dcChargingMinutes    Decimal? @map("dc_charging_minutes") @db.Decimal(6, 2)
+  dcChargingPowerKw    Decimal? @map("dc_charging_power_kw") @db.Decimal(8, 2)
+  dimensions           String?  @db.VarChar(160)
+  wheelbaseMm          Decimal? @map("wheelbase_mm") @db.Decimal(8, 2)
+  weightKg             Decimal? @map("weight_kg") @db.Decimal(8, 2)
+  seatHeightMm         Decimal? @map("seat_height_mm") @db.Decimal(8, 2)
+  warrantyYears        Decimal? @map("warranty_years") @db.Decimal(5, 2)
+  warrantyKm           Decimal? @map("warranty_km") @db.Decimal(10, 2)
+  batteryWarrantyYears Decimal? @map("battery_warranty_years") @db.Decimal(5, 2)
+  batteryWarrantyKm    Decimal? @map("battery_warranty_km") @db.Decimal(10, 2)
+  reliabilityScore     Int?     @map("reliability_score")
+  reliabilityRating    String?  @map("reliability_rating") @db.VarChar(120)
+  reliabilityNote      String?  @map("reliability_note") @db.Text
+
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@index([realWorldRangeKm])
+  @@index([batteryCapacityKwh])
+  @@index([topSpeedKmh])
+  @@map("vehicle_specifications")
+}
+
+model VehicleDetailItem {
+  id        BigInt @id @default(autoincrement()) @db.BigInt
+  vehicleId BigInt @map("vehicle_id") @db.BigInt
+  section   String @db.VarChar(80)
+  label     String @db.VarChar(120)
+  value     String @db.VarChar(500)
+  sortOrder Int    @default(0) @map("sort_order")
+
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@index([vehicleId, section, sortOrder])
+  @@map("vehicle_detail_items")
+}
+
+model VehicleMedia {
+  vehicleId BigInt           @map("vehicle_id") @db.BigInt
+  mediaId   BigInt           @map("media_id") @db.BigInt
+  role      VehicleMediaRole @default(GALLERY)
+  sortOrder Int              @default(0) @map("sort_order")
+  altText   String?          @map("alt_text") @db.VarChar(255)
+
+  vehicle Vehicle   @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  media   MediaFile @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@id([vehicleId, mediaId])
+  @@index([mediaId])
+  @@index([vehicleId, role, sortOrder])
+  @@map("vehicle_media")
+}
+
+model Showroom {
+  id         BigInt            @id @default(autoincrement()) @db.BigInt
+  name       String            @db.VarChar(180)
+  slug       String            @unique @db.VarChar(200)
+  type       ShowroomType      @default(SHOWROOM)
+  address    String            @db.VarChar(300)
+  area       String?           @db.VarChar(100)
+  division   String?           @db.VarChar(100)
+  phone      String?           @db.VarChar(40)
+  email      String?           @db.VarChar(255)
+  latitude   Decimal?          @db.Decimal(10, 7)
+  longitude  Decimal?          @db.Decimal(10, 7)
+  mapLabel   String?           @map("map_label") @db.VarChar(160)
+  isVerified Boolean           @default(false) @map("is_verified")
+  status     PublicationStatus @default(DRAFT)
+
+  brands ShowroomBrand[]
+  media  ShowroomMedia[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([division, area])
+  @@index([status, isVerified])
+  @@map("showrooms")
+}
+
+model ShowroomBrand {
+  showroomId BigInt @map("showroom_id") @db.BigInt
+  brandId    BigInt @map("brand_id") @db.BigInt
+
+  showroom Showroom @relation(fields: [showroomId], references: [id], onDelete: Cascade)
+  brand    Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@id([showroomId, brandId])
+  @@index([brandId])
+  @@map("showroom_brands")
+}
+
+model ShowroomMedia {
+  showroomId BigInt            @map("showroom_id") @db.BigInt
+  mediaId    BigInt            @map("media_id") @db.BigInt
+  role       ShowroomMediaRole @default(GALLERY)
+  sortOrder  Int               @default(0) @map("sort_order")
+
+  showroom Showroom  @relation(fields: [showroomId], references: [id], onDelete: Cascade)
+  media    MediaFile @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@id([showroomId, mediaId])
+  @@index([mediaId])
+  @@map("showroom_media")
+}
+
+model ArticleCategory {
+  id     BigInt                @id @default(autoincrement()) @db.BigInt
+  name   String                @unique @db.VarChar(100)
+  slug   String                @unique @db.VarChar(120)
+  status ArticleCategoryStatus @default(ACTIVE)
+
+  articles Article[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("article_categories")
+}
+
+model Article {
+  id          BigInt            @id @default(autoincrement()) @db.BigInt
+  title       String            @db.VarChar(240)
+  slug        String            @unique @db.VarChar(260)
+  excerpt     String?           @db.Text
+  body        String?           @db.Text
+  readTimeMin Int?              @map("read_time_min")
+  categoryId  BigInt            @map("category_id") @db.BigInt
+  authorId    BigInt?           @map("author_id") @db.BigInt
+  status      PublicationStatus @default(DRAFT)
+  isFeatured  Boolean           @default(false) @map("is_featured")
+  publishedAt DateTime?         @map("published_at")
+
+  category ArticleCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  author   User?           @relation("ArticleAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  media    ArticleMedia[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([categoryId, status])
+  @@index([status, publishedAt])
+  @@map("articles")
+}
+
+model ArticleMedia {
+  articleId BigInt           @map("article_id") @db.BigInt
+  mediaId   BigInt           @map("media_id") @db.BigInt
+  role      ArticleMediaRole @default(INLINE)
+  sortOrder Int              @default(0) @map("sort_order")
+
+  article Article   @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  media   MediaFile @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@id([articleId, mediaId])
+  @@index([mediaId])
+  @@map("article_media")
 }
