@@ -1,15 +1,43 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { usePathname } from "next/navigation";
-import { Zap, Menu, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { CircleUserRound, LayoutDashboard, LogOut, Menu, X, Zap } from "lucide-react";
 import { NAV_ITEMS } from "@/lib/data/homepage";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import type { UserDTO } from "@/types/auth";
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const [user, setUser] = useState<UserDTO | null>(null);
   const pathname = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    let mounted = true;
+    fetch("/api/auth/me", { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((response) => {
+        if (mounted) setUser(response?.data?.user ?? null);
+      })
+      .catch(() => {
+        if (mounted) setUser(null);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [pathname]);
+
+  async function handleSignOut() {
+    await fetch("/api/auth/signout", { method: "POST" });
+    setUser(null);
+    setAccountMenuOpen(false);
+    setMobileMenuOpen(false);
+    router.push("/");
+    router.refresh();
+  }
 
   const isItemActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -20,7 +48,7 @@ export function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-slate-200 dark:border-slate-800/80 bg-white/85 dark:bg-[#070b14]/85 backdrop-blur-md transition-colors duration-150">
+    <header className="relative sticky top-0 z-50 w-full border-b border-slate-200 bg-white/85 backdrop-blur-md transition-colors duration-150 dark:border-slate-800/80 dark:bg-[#070b14]/85">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-2 group">
@@ -56,17 +84,21 @@ export function Navbar() {
         <div className="hidden md:flex items-center gap-3">
           <ThemeToggle />
 
-          <Link
-            href="/login"
-            className="inline-flex items-center justify-center rounded-lg bg-[#00DF8F] px-4 py-1.5 text-sm font-semibold text-[#070b14] transition-all hover:bg-[#00DF8F]/90 active:scale-95 shadow-sm shadow-emerald-500/20"
-          >
-            Login
-          </Link>
+          {user ? (
+            <div className="relative">
+              <button type="button" onClick={() => setAccountMenuOpen((open) => !open)} aria-expanded={accountMenuOpen} aria-label="Open account menu" className={`flex h-9 w-9 items-center justify-center rounded-full border transition-all ${accountMenuOpen ? "border-emerald-500 bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300" : "border-slate-200 bg-white text-slate-500 hover:border-emerald-400 hover:text-emerald-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"}`}>
+                <CircleUserRound className="h-[19px] w-[19px]" />
+              </button>
+              {accountMenuOpen && <div className="absolute right-0 top-12 z-50 w-44 rounded-xl border border-slate-200 bg-white p-1.5 shadow-[0_12px_32px_rgba(15,23,42,0.16)] dark:border-slate-700 dark:bg-[#0e1628] dark:shadow-black/30"><Link href="/dashboard" onClick={() => setAccountMenuOpen(false)} className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"><LayoutDashboard className="h-4 w-4 text-slate-500 dark:text-slate-400" /> Dashboard</Link><button type="button" onClick={handleSignOut} className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:hover:bg-red-500/10"><LogOut className="h-4 w-4" /> Logout</button></div>}
+            </div>
+          ) : <Link href="/login" className="inline-flex items-center justify-center rounded-lg bg-[#00DF8F] px-4 py-1.5 text-sm font-semibold text-[#070b14] transition-all hover:bg-[#00DF8F]/90 active:scale-95 shadow-sm shadow-emerald-500/20">Login</Link>}
         </div>
 
         {/* Mobile Header Controls */}
         <div className="flex items-center gap-2 md:hidden">
           <ThemeToggle />
+
+          {user && <button type="button" onClick={() => setAccountMenuOpen((open) => !open)} aria-expanded={accountMenuOpen} aria-label="Open account menu" className={`flex h-9 w-9 items-center justify-center rounded-full border ${accountMenuOpen ? "border-emerald-500 bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300" : "border-slate-200 bg-white text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"}`}><CircleUserRound className="h-[19px] w-[19px]" /></button>}
 
           <button
             type="button"
@@ -78,6 +110,19 @@ export function Navbar() {
           </button>
         </div>
       </div>
+
+      {user && accountMenuOpen && (
+        <div className="absolute right-4 top-[4.5rem] z-50 w-44 rounded-xl border border-slate-200 bg-white p-1.5 shadow-[0_12px_32px_rgba(15,23,42,0.16)] md:hidden dark:border-slate-700 dark:bg-[#0e1628] dark:shadow-black/30">
+          <Link href="/dashboard" onClick={() => setAccountMenuOpen(false)} className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
+            <LayoutDashboard className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+            Dashboard
+          </Link>
+          <button type="button" onClick={handleSignOut} className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:hover:bg-red-500/10">
+            <LogOut className="h-4 w-4" />
+            Logout
+          </button>
+        </div>
+      )}
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
@@ -108,13 +153,7 @@ export function Navbar() {
               </p>
               <ThemeToggle showLabels />
             </div>
-            <Link
-              href="/login"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex w-full items-center justify-center rounded-lg bg-[#00DF8F] px-4 py-2.5 text-base font-semibold text-[#070b14] hover:bg-[#00DF8F]/90 shadow-sm"
-            >
-              Login
-            </Link>
+            {!user && <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="flex w-full items-center justify-center rounded-lg bg-[#00DF8F] px-4 py-2.5 text-base font-semibold text-[#070b14] shadow-sm hover:bg-[#00DF8F]/90">Login</Link>}
           </div>
         </div>
       )}
