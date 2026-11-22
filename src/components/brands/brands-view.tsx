@@ -1,25 +1,46 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Search } from "lucide-react";
-import { EV_BRANDS, EVBrand } from "@/lib/data/brands";
+import type { EVBrand } from "@/lib/data/brands";
 import { BrandCard } from "./brand-card";
 import { GoogleAdSlot } from "@/components/ads/google-ad-slot";
 import { ADS_CONFIG } from "@/lib/config/ads";
 
+type ApiBrand = { slug: string; name: string; origin?: string | null; category?: string | null; description?: string | null; _count?: { vehicles: number } };
+
 export function BrandsView() {
+  const [brands, setBrands] = useState<EVBrand[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
+  useEffect(() => {
+    fetch("/api/v1/brands")
+      .then((response) => response.json())
+      .then((response) => setBrands((response.data ?? []).map((brand: ApiBrand) => ({
+        id: brand.slug,
+        name: brand.name,
+        slug: brand.slug,
+        vehicleCount: brand._count?.vehicles ?? 0,
+        origin: brand.origin ?? "",
+        category: brand.category ?? "Electric Vehicles",
+        description: brand.description ?? "",
+        logoType: brand.slug as EVBrand["logoType"],
+      }))))
+      .catch(() => setBrands([]))
+      .finally(() => setIsLoading(false));
+  }, []);
+
   const filteredBrands: EVBrand[] = useMemo(() => {
-    if (!searchQuery.trim()) return EV_BRANDS;
+    if (!searchQuery.trim()) return brands;
     const q = searchQuery.toLowerCase();
-    return EV_BRANDS.filter(
+    return brands.filter(
       (b) =>
         b.name.toLowerCase().includes(q) ||
         b.category.toLowerCase().includes(q) ||
         b.origin.toLowerCase().includes(q)
     );
-  }, [searchQuery]);
+  }, [searchQuery, brands]);
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 md:py-12">
@@ -49,7 +70,9 @@ export function BrandsView() {
 
       {/* Main Brands Card Container */}
       <div className="rounded-3xl border border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#0e1628] p-8 sm:p-12 shadow-2xl transition-colors duration-150">
-        {filteredBrands.length === 0 ? (
+        {isLoading ? (
+          <div className="py-16 text-center text-slate-500">Loading brands...</div>
+        ) : filteredBrands.length === 0 ? (
           <div className="py-16 text-center text-slate-500">
             No EV brands found matching &ldquo;{searchQuery}&rdquo;.
           </div>

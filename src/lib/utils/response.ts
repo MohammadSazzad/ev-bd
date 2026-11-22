@@ -18,6 +18,11 @@ export function serializeBigInt<T>(data: T): T {
     return data.toISOString() as unknown as T;
   }
 
+  // Prisma Decimal values are JSON-safe only after explicit conversion.
+  if (typeof data === "object" && data !== null && data.constructor?.name === "Decimal") {
+    return String(data) as unknown as T;
+  }
+
   if (Array.isArray(data)) {
     return data.map((item) => serializeBigInt(item)) as unknown as T;
   }

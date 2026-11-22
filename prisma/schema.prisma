@@ -102,6 +102,7 @@ model User {
   roles              UserRole[]
   verificationTokens VerificationToken[]
   authoredArticles   Article[]           @relation("ArticleAuthor")
+  savedComparisons   SavedComparison[]
 
   profileImageId BigInt?    @unique @map("profile_image_id") @db.BigInt
   profileImage   MediaFile? @relation("UserProfileImage", fields: [profileImageId], references: [id], onDelete: SetNull)
@@ -109,6 +110,33 @@ model User {
   @@index([status])
   @@index([isEmailVerified])
   @@map("users")
+}
+
+model SavedComparison {
+  id        BigInt   @id @default(autoincrement()) @db.BigInt
+  userId    BigInt   @map("user_id") @db.BigInt
+  name      String   @db.VarChar(160)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user     User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vehicles SavedComparisonVehicle[]
+
+  @@index([userId, updatedAt])
+  @@map("saved_comparisons")
+}
+
+model SavedComparisonVehicle {
+  comparisonId BigInt @map("comparison_id") @db.BigInt
+  vehicleId    BigInt @map("vehicle_id") @db.BigInt
+  sortOrder    Int    @default(0) @map("sort_order")
+
+  comparison SavedComparison @relation(fields: [comparisonId], references: [id], onDelete: Cascade)
+  vehicle    Vehicle         @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@id([comparisonId, vehicleId])
+  @@index([vehicleId])
+  @@map("saved_comparison_vehicles")
 }
 
 model Role {
@@ -241,6 +269,7 @@ model Vehicle {
   specs    VehicleSpecification?
   media    VehicleMedia[]
   details  VehicleDetailItem[]
+  savedComparisons SavedComparisonVehicle[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

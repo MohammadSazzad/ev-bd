@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Plus, X } from "lucide-react";
 import {
@@ -17,15 +17,24 @@ export function ComparisonMatrix({
   initialVehicleIds = ["byd-atto-3", "mg-zs-ev"],
 }: ComparisonMatrixProps) {
   const [selectedIds, setSelectedIds] = useState<string[]>(initialVehicleIds);
+  const [vehicles, setVehicles] = useState<ComparisonVehicle[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  const selectedVehicles: ComparisonVehicle[] = selectedIds
-    .map((id) => COMPARISON_VEHICLES[id])
-    .filter(Boolean);
+  useEffect(() => {
+    fetch(`/api/v1/vehicles/compare?ids=${encodeURIComponent(selectedIds.join(","))}`)
+      .then((response) => response.json())
+      .then((response) => setVehicles((response.data ?? []).map((vehicle: { slug: string; name: string; brand: { name: string }; category: { name: string }; priceBdt: string | number; specs?: { batteryCapacityKwh?: string | number | null; realWorldRangeKm?: string | number | null; acChargingHours?: string | number | null; dcChargingMinutes?: string | number | null; motorPowerKw?: string | number | null; topSpeedKmh?: string | number | null }; media?: Array<{ media: { filePath: string } }> }) => ({
+        id: vehicle.slug, name: vehicle.name, brand: vehicle.brand.name, category: vehicle.category.name,
+        imageUrl: vehicle.media?.[0]?.media.filePath ?? "/file.svg", priceBdt: `৳ ${Number(vehicle.priceBdt).toLocaleString()}`, numericPrice: Number(vehicle.priceBdt),
+        batteryCapacity: `${vehicle.specs?.batteryCapacityKwh ?? "—"} kWh`, realWorldRange: `${vehicle.specs?.realWorldRangeKm ?? "—"} km`, numericRange: Number(vehicle.specs?.realWorldRangeKm ?? 0),
+        chargingTime: `${vehicle.specs?.acChargingHours ?? "—"}h AC`, motorOutput: `${vehicle.specs?.motorPowerKw ?? "—"} kW`, topSpeed: `${vehicle.specs?.topSpeedKmh ?? "—"} km/h`, warranty: "See vehicle details",
+      }))))
+      .catch(() => setVehicles([]));
+  }, [selectedIds]);
 
-  const availableToAdd = Object.values(COMPARISON_VEHICLES).filter(
-    (v) => !selectedIds.includes(v.id)
-  );
+  const selectedVehicles: ComparisonVehicle[] = vehicles.length ? vehicles : selectedIds.map((id) => COMPARISON_VEHICLES[id]).filter(Boolean);
+
+  const availableToAdd = Object.values(COMPARISON_VEHICLES).filter((v) => !selectedIds.includes(v.id));
 
   const handleAddVehicle = (id: string) => {
     if (selectedIds.length < 3) {

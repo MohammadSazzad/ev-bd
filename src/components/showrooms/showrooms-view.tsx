@@ -1,14 +1,18 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { VERIFIED_SHOWROOMS, Showroom } from "@/lib/data/showrooms";
+import { useState, useMemo, useEffect } from "react";
+import type { Showroom } from "@/lib/data/showrooms";
 import { ShowroomFilters } from "./showroom-filters";
 import { ShowroomCard } from "./showroom-card";
 import { InteractiveMap } from "./interactive-map";
 import { GoogleAdSlot } from "@/components/ads/google-ad-slot";
 import { ADS_CONFIG } from "@/lib/config/ads";
 
+type ApiShowroom = { slug: string; name: string; address: string; phone?: string | null; division?: string | null; area?: string | null; mapLabel?: string | null; brands: Array<{ brand: { name: string } }> };
+
 export function ShowroomsView() {
+  const [showrooms, setShowrooms] = useState<Showroom[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedDivision, setSelectedDivision] = useState("Dhaka Division");
   const [selectedBrand, setSelectedBrand] = useState("All Brands");
   const [activeTag, setActiveTag] = useState<string | null>("Dhaka Central");
@@ -16,8 +20,29 @@ export function ShowroomsView() {
     "byd-tejgaon"
   );
 
+  useEffect(() => {
+    const params = new URLSearchParams({ pageSize: "50", division: selectedDivision });
+    if (selectedBrand !== "All Brands") params.set("brand", selectedBrand.toLowerCase().replaceAll(" ", "-"));
+    fetch(`/api/v1/showrooms?${params}`)
+      .then((response) => response.json())
+      .then((response) => setShowrooms((response.data?.items ?? []).map((showroom: ApiShowroom) => ({
+        id: showroom.slug,
+        name: showroom.name,
+        distance: "",
+        address: showroom.address,
+        phone: showroom.phone ?? "",
+        brands: showroom.brands.map((item) => item.brand.name).join(", "),
+        division: showroom.division ?? "",
+        area: showroom.area ?? "",
+        mapLabel: showroom.mapLabel ?? showroom.area ?? showroom.name,
+        mapCoords: { x: 50, y: 50 },
+      }))))
+      .catch(() => setShowrooms([]))
+      .finally(() => setIsLoading(false));
+  }, [selectedDivision, selectedBrand]);
+
   const filteredShowrooms: Showroom[] = useMemo(() => {
-    return VERIFIED_SHOWROOMS.filter((s) => {
+    return showrooms.filter((s) => {
       if (selectedDivision && s.division !== selectedDivision) {
         return false;
       }
@@ -26,7 +51,7 @@ export function ShowroomsView() {
       }
       return true;
     });
-  }, [selectedDivision, selectedBrand]);
+  }, [showrooms, selectedDivision, selectedBrand]);
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 md:py-12">
@@ -58,7 +83,9 @@ export function ShowroomsView() {
             VERIFIED SHOWROOMS ({filteredShowrooms.length} RESULTS)
           </div>
 
-          {filteredShowrooms.length === 0 ? (
+          {isLoading ? (
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0e1628] p-8 text-center text-slate-500">Loading showrooms...</div>
+          ) : filteredShowrooms.length === 0 ? (
             <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0e1628] p-8 text-center text-slate-500">
               No showrooms found for this selection.
             </div>

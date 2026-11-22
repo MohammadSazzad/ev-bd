@@ -113,6 +113,14 @@ export class UserRepository {
       },
     });
   }
+
+  async updateProfile(userId: bigint, data: { name?: string }) {
+    return prisma.user.update({
+      where: { id: userId },
+      data,
+      include: { roles: { include: { role: true } }, profileImage: true },
+    });
+  }
 }
 
 export const userRepository = new UserRepository();

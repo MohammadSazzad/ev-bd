@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
-import { CATALOG_VEHICLES } from "@/lib/data/vehicles";
+import type { CatalogVehicle } from "@/lib/data/vehicles";
 import { FiltersSidebar, FilterState } from "./filters-sidebar";
 import { VehicleCard } from "./vehicle-card";
 import { CatalogHeader, SortOption } from "./catalog-header";
@@ -10,7 +10,16 @@ import { ArrowRight, Scale } from "lucide-react";
 import { GoogleAdSlot } from "@/components/ads/google-ad-slot";
 import { ADS_CONFIG } from "@/lib/config/ads";
 
+type ApiVehicle = {
+  slug: string; name: string; priceBdt: string | number;
+  brand: { name: string }; category: { name: string };
+  specs?: { realWorldRangeKm?: string | number | null; batteryCapacityKwh?: string | number | null; topSpeedKmh?: string | number | null } | null;
+  media?: Array<{ media: { filePath: string } }>;
+};
+
 export function CatalogView() {
+  const [vehicles, setVehicles] = useState<CatalogVehicle[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [filters, setFilters] = useState<FilterState>({
     categories: ["Electric Cars"], // Matches reference screenshot checked state
     brand: "All Brands",
@@ -20,6 +29,29 @@ export function CatalogView() {
 
   const [sortBy, setSortBy] = useState<SortOption>("highest-range");
   const [comparedIds, setComparedIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    const params = new URLSearchParams({ pageSize: "50" });
+    fetch(`/api/v1/vehicles?${params}`)
+      .then((response) => response.json())
+      .then((response) => {
+        const items = response.data?.items ?? [];
+        setVehicles(items.map((vehicle: ApiVehicle) => ({
+          id: vehicle.slug,
+          name: vehicle.name,
+          brand: vehicle.brand.name,
+          category: vehicle.category.name,
+          price: Number(vehicle.priceBdt),
+          formattedPrice: `৳ ${Number(vehicle.priceBdt).toLocaleString()}`,
+          rangeKm: Number(vehicle.specs?.realWorldRangeKm ?? 0),
+          batteryKwh: Number(vehicle.specs?.batteryCapacityKwh ?? 0),
+          topSpeedKmh: vehicle.specs?.topSpeedKmh ? Number(vehicle.specs.topSpeedKmh) : undefined,
+          images: vehicle.media?.map((item) => item.media.filePath) ?? [],
+        })));
+      })
+      .catch(() => setVehicles([]))
+      .finally(() => setIsLoading(false));
+  }, []);
 
   const handleToggleCompare = (id: string) => {
     setComparedIds((prev) =>
@@ -38,7 +70,7 @@ export function CatalogView() {
 
   // Filter & sort logic
   const filteredVehicles = useMemo(() => {
-    return CATALOG_VEHICLES.filter((vehicle) => {
+    return vehicles.filter((vehicle) => {
       // If categories selected, match category
       if (
         filters.categories.length > 0 &&
@@ -81,7 +113,7 @@ export function CatalogView() {
           return 0;
       }
     });
-  }, [filters, sortBy]);
+  }, [filters, sortBy, vehicles]);
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 md:py-10">
@@ -107,7 +139,9 @@ export function CatalogView() {
 
         {/* Right Column: Vehicle Cards List (8 cols on lg) */}
         <div className="lg:col-span-8 space-y-8">
-          {filteredVehicles.length === 0 ? (
+          {isLoading ? (
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0e1628] p-12 text-center text-slate-500">Loading vehicles...</div>
+          ) : filteredVehicles.length === 0 ? (
             <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0e1628] p-12 text-center shadow-sm">
               <p className="text-base text-slate-700 dark:text-slate-300">
                 No electric vehicles match your selected filter criteria.
