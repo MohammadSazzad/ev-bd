@@ -3,8 +3,8 @@ import { verifyAuthToken } from "@/lib/auth/jwt";
 import { AUTH_COOKIE_NAME } from "@/lib/auth/cookies";
 
 // Define protected route patterns
-const PROTECTED_PAGE_PATTERNS = ["/admin"];
-const PROTECTED_API_PATTERNS = ["/api/admin"];
+const PROTECTED_PAGE_PATTERNS = ["/admin", "/dashboard"];
+const PROTECTED_API_PATTERNS = ["/api/admin", "/api/v1/admin"];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -41,17 +41,17 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // For admin routes, check if user has ADMIN role
-  const isAdminRoute = pathname.startsWith("/admin") || pathname.startsWith("/api/admin");
+  // The panel is available to operational roles; individual modules enforce finer permissions server-side.
+  const isAdminRoute = pathname.startsWith("/admin") || pathname.startsWith("/api/admin") || pathname.startsWith("/api/v1/admin");
   const userRoles = Array.isArray(payload.roles) ? payload.roles : [];
-  const hasAdminRole = userRoles.includes("ADMIN");
+  const hasPanelRole = userRoles.some((role) => ["ADMIN", "EDITOR", "MODERATOR", "SHOWROOM"].includes(role));
 
-  if (isAdminRoute && !hasAdminRole) {
+  if (isAdminRoute && !hasPanelRole) {
     if (isProtectedApi) {
       return NextResponse.json(
         {
           success: false,
-          message: "Forbidden: Administrator privileges required.",
+          message: "Forbidden: Panel privileges required.",
         },
         { status: 403 }
       );

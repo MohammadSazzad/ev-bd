@@ -1,24 +1,25 @@
-import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth/session";
+import Link from "next/link";
+import { ArrowRight, CheckCircle2, CircleAlert, FilePlus2, ImagePlus, Plus, ShieldCheck } from "lucide-react";
 import { prisma } from "@/lib/db/prisma";
 
-export default async function AdminPage() {
-  const user = await getCurrentUser();
-  if (!user || !user.roles.includes("ADMIN")) redirect("/");
-  const [vehicles, brands, showrooms, articles] = await Promise.all([
-    prisma.vehicle.count(),
-    prisma.brand.count(),
-    prisma.showroom.count(),
-    prisma.article.count(),
+export default async function AdminOverviewPage() {
+  const [vehicleCount, brandCount, categoryCount, showroomCount, articleCount, userCount, mediaCount, draftVehicles, draftArticles, recentVehicles, recentArticles] = await Promise.all([
+    prisma.vehicle.count(), prisma.brand.count(), prisma.vehicleCategory.count(), prisma.showroom.count(), prisma.article.count(), prisma.user.count(), prisma.mediaFile.count(),
+    prisma.vehicle.count({ where: { status: "DRAFT" } }), prisma.article.count({ where: { status: "DRAFT" } }),
+    prisma.vehicle.findMany({ take: 5, orderBy: { updatedAt: "desc" }, select: { id: true, name: true, status: true, updatedAt: true } }),
+    prisma.article.findMany({ take: 5, orderBy: { updatedAt: "desc" }, select: { id: true, title: true, status: true, updatedAt: true } }),
   ]);
-  const cards = [["Vehicles", vehicles], ["Brands", brands], ["Showrooms", showrooms], ["Articles", articles]];
-  return (
-    <main className="mx-auto max-w-6xl p-8">
-      <h1 className="text-3xl font-bold">VoltBD Admin</h1>
-      <p className="mt-2 text-slate-500">Manage catalogue content through the versioned admin APIs.</p>
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {cards.map(([label, count]) => <div key={label} className="rounded-2xl border p-6"><p className="text-sm text-slate-500">{label}</p><p className="mt-2 text-3xl font-bold">{count}</p></div>)}
-      </div>
-    </main>
-  );
+
+  const stats = [["Vehicles", vehicleCount, "Total catalogue records", "text-emerald-600"], ["Brands", brandCount, "Manufacturers represented", "text-blue-600"], ["Showrooms", showroomCount, "Dealer locations", "text-violet-600"], ["Articles", articleCount, "Editorial content", "text-amber-600"]] as const;
+  const recent = [...recentVehicles.map((item) => ({ label: item.name, type: "Vehicle", status: item.status, date: item.updatedAt })), ...recentArticles.map((item) => ({ label: item.title, type: "Article", status: item.status, date: item.updatedAt }))].sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 6);
+
+  return <div className="space-y-8">
+    <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-400">Operations overview</p><h1 className="mt-2 text-3xl font-bold tracking-tight">Good evening, VoltBD team</h1><p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Here is what is happening across your platform today.</p></div><div className="flex gap-2"><Link href="/admin/vehicles/new" className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-bold text-slate-950 shadow-sm hover:bg-emerald-400"><Plus className="h-4 w-4" /> Add vehicle</Link><Link href="/admin/articles/new" className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"><FilePlus2 className="h-4 w-4" /> Write article</Link></div></div>
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{stats.map(([label, value, caption, color]) => <div key={label} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-[#0d1525]"><div className="flex items-center justify-between"><p className="text-sm font-medium text-slate-500 dark:text-slate-400">{label}</p><span className={`h-2 w-2 rounded-full bg-current ${color}`} /></div><p className="mt-4 text-3xl font-bold tracking-tight">{value}</p><p className="mt-1 text-xs text-slate-500">{caption}</p></div>)}</div>
+    <div className="grid gap-6 xl:grid-cols-[1.3fr_0.7fr]">
+      <section className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-[#0d1525]"><div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 dark:border-slate-800"><div><h2 className="font-semibold">Recent activity</h2><p className="mt-1 text-xs text-slate-500">Latest catalogue and editorial changes</p></div><Link href="/admin/vehicles" className="text-xs font-semibold text-emerald-600">View all <ArrowRight className="ml-1 inline h-3 w-3" /></Link></div><div className="divide-y divide-slate-100 dark:divide-slate-800">{recent.map((item) => <div key={`${item.type}-${item.label}`} className="flex items-center justify-between gap-4 px-5 py-4"><div className="min-w-0"><p className="truncate text-sm font-medium">{item.label}</p><p className="mt-1 text-xs text-slate-500">{item.type} · {item.date.toLocaleDateString()}</p></div><span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${item.status === "PUBLISHED" ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300" : "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300"}`}>{item.status}</span></div>)}{recent.length === 0 && <p className="px-5 py-10 text-center text-sm text-slate-500">No activity yet.</p>}</div></section>
+      <section className="space-y-4"><div className="rounded-xl border border-amber-200 bg-amber-50 p-5 dark:border-amber-500/20 dark:bg-amber-500/10"><div className="flex items-center gap-2 text-amber-700 dark:text-amber-300"><CircleAlert className="h-4 w-4" /><h2 className="font-semibold">Needs attention</h2></div><div className="mt-5 grid grid-cols-2 gap-3"><div><p className="text-2xl font-bold text-amber-800 dark:text-amber-200">{draftVehicles}</p><p className="text-xs text-amber-700/80 dark:text-amber-300/80">Vehicle drafts</p></div><div><p className="text-2xl font-bold text-amber-800 dark:text-amber-200">{draftArticles}</p><p className="text-xs text-amber-700/80 dark:text-amber-300/80">Article drafts</p></div></div></div><div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-[#0d1525]"><h2 className="font-semibold">Workspace health</h2><div className="mt-4 space-y-3 text-sm"><p className="flex items-center justify-between"><span className="text-slate-500">Database records</span><span className="font-semibold">{categoryCount + userCount + mediaCount}+</span></p><p className="flex items-center justify-between"><span className="text-slate-500">Media assets</span><span className="font-semibold">{mediaCount}</span></p><p className="flex items-center gap-2 text-emerald-600"><CheckCircle2 className="h-4 w-4" /> Core services operational</p></div></div></section>
+    </div>
+    <section><div className="mb-4 flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-600" /><h2 className="font-semibold">Quick actions</h2></div><div className="grid gap-3 sm:grid-cols-3"><Link href="/admin/media" className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 text-sm font-semibold shadow-sm hover:border-emerald-400 dark:border-slate-800 dark:bg-[#0d1525]"><ImagePlus className="h-5 w-5 text-emerald-600" /> Manage media</Link><Link href="/admin/showrooms" className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 text-sm font-semibold shadow-sm hover:border-emerald-400 dark:border-slate-800 dark:bg-[#0d1525]"><Plus className="h-5 w-5 text-emerald-600" /> Add showroom</Link><Link href="/admin/users" className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 text-sm font-semibold shadow-sm hover:border-emerald-400 dark:border-slate-800 dark:bg-[#0d1525]"><ShieldCheck className="h-5 w-5 text-emerald-600" /> Review access</Link></div></section>
+  </div>;
 }

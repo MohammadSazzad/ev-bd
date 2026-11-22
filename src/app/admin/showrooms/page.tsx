@@ -1,0 +1,3 @@
+import { prisma } from "@/lib/db/prisma";
+import { ResourcePage } from "@/components/admin/resource-page";
+export default async function AdminShowroomsPage() { const rows = await prisma.showroom.findMany({ include: { brands: { include: { brand: true } } }, orderBy: { updatedAt: "desc" } }); return <ResourcePage eyebrow="Network" title="Showrooms" description="Manage verified dealers, importers, and service locations." addLabel="Add showroom" rows={rows.map((row) => ({ id: row.id.toString(), title: row.name, subtitle: row.address, meta: `${row.brands.map((item) => item.brand.name).join(", ") || "No brands"} · ${row.division ?? "Division not set"}`, status: row.status }))} />; }

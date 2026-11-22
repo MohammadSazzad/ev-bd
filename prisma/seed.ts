@@ -2,6 +2,7 @@ import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { MediaType, VehicleMediaRole, ShowroomMediaRole, ArticleMediaRole } from "../src/generated/prisma/enums";
+import { hashPassword } from "../src/lib/auth/password";
 
 const connectionString = process.env.DATABASE_URL;
 
@@ -69,6 +70,14 @@ const roles = [
   ["USER", "Standard platform user"],
 ] as const;
 
+// Development/demo panel accounts. Change these immediately outside local development.
+const panelUsers = [
+  { name: "VoltBD Super Admin", email: "admin@voltbd.com", password: "VoltBD@Admin2026!", role: "ADMIN" },
+  { name: "VoltBD Content Editor", email: "editor@voltbd.com", password: "VoltBD@Editor2026!", role: "EDITOR" },
+  { name: "VoltBD Moderator", email: "moderator@voltbd.com", password: "VoltBD@Moderator2026!", role: "MODERATOR" },
+  { name: "VoltBD Showroom Manager", email: "showroom@voltbd.com", password: "VoltBD@Showroom2026!", role: "SHOWROOM" },
+] as const;
+
 const categories = [
   ["Electric Cars", "electric-cars", "Premium electric sedans and SUVs", "CAR"],
   ["Electric Bikes", "electric-bikes", "High-performance commuter bikes", "BIKE"],
@@ -130,6 +139,17 @@ async function main() {
     await prisma.role.upsert({ where: { name }, update: { description }, create: { name, description } });
   }
 
+  for (const panelUser of panelUsers) {
+    const role = await prisma.role.findUniqueOrThrow({ where: { name: panelUser.role } });
+    const user = await prisma.user.upsert({
+      where: { email: panelUser.email },
+      update: { name: panelUser.name, passwordHash: await hashPassword(panelUser.password), status: "ACTIVE", isEmailVerified: true, emailVerifiedAt: new Date() },
+      create: { name: panelUser.name, email: panelUser.email, passwordHash: await hashPassword(panelUser.password), status: "ACTIVE", isEmailVerified: true, emailVerifiedAt: new Date() },
+    });
+    await prisma.userRole.deleteMany({ where: { userId: user.id } });
+    await prisma.userRole.create({ data: { userId: user.id, roleId: role.id } });
+  }
+
   for (const [name, slug, description, icon] of categories) {
     await prisma.vehicleCategory.upsert({ where: { slug }, update: { name, description, icon, status: "PUBLISHED" }, create: { name, slug, description, icon, status: "PUBLISHED" } });
   }
@@ -179,7 +199,7 @@ async function main() {
     await attachArticleImage(saved.id, slug, image);
   }
 
-  console.log(`Seeded ${roles.length} roles, ${brands.length} brands with logos, ${vehicles.length} vehicles with galleries, ${showrooms.length} showrooms with covers, and ${articles.length} articles with covers.`);
+  console.log(`Seeded ${roles.length} roles, ${panelUsers.length} panel users, ${brands.length} brands with logos, ${vehicles.length} vehicles with galleries, ${showrooms.length} showrooms with covers, and ${articles.length} articles with covers.`);
 }
 
 main()

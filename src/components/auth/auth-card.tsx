@@ -24,7 +24,10 @@ interface AuthCardProps {
 export function AuthCard({ initialTab = "login" }: AuthCardProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectUrl = searchParams.get("redirect") || "/";
+  const requestedRedirect = searchParams.get("redirect") || searchParams.get("callbackUrl");
+  const redirectUrl = requestedRedirect?.startsWith("/") && !requestedRedirect.startsWith("//")
+    ? requestedRedirect
+    : "/dashboard";
 
   const [activeTab, setActiveTab] = useState<"login" | "register">(initialTab);
   const [showPassword, setShowPassword] = useState(false);

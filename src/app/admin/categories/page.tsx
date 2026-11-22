@@ -1,0 +1,3 @@
+import { prisma } from "@/lib/db/prisma";
+import { ResourcePage } from "@/components/admin/resource-page";
+export default async function AdminCategoriesPage() { const rows = await prisma.vehicleCategory.findMany({ include: { _count: { select: { vehicles: true } } }, orderBy: { name: "asc" } }); return <ResourcePage eyebrow="Catalogue" title="Categories" description="Control the vehicle taxonomy used across the public directory." addLabel="Add category" rows={rows.map((row) => ({ id: row.id.toString(), title: row.name, subtitle: row.description ?? "No description", meta: `${row._count.vehicles} vehicles · ${row.icon}`, status: row.status }))} />; }

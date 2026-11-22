@@ -1,0 +1,3 @@
+import { prisma } from "@/lib/db/prisma";
+import { ResourcePage } from "@/components/admin/resource-page";
+export default async function AdminUsersPage() { const rows = await prisma.user.findMany({ include: { roles: { include: { role: true } } }, orderBy: { createdAt: "desc" } }); return <ResourcePage eyebrow="Access control" title="Users" description="Review accounts, statuses, verification, and assigned roles." rows={rows.map((row) => ({ id: row.id.toString(), title: row.name, subtitle: row.email, meta: row.roles.map((item) => item.role.name).join(", ") || "USER", status: row.status }))} />; }

@@ -1,0 +1,8 @@
+import { NextRequest } from "next/server";
+import { apiError, apiSuccess } from "@/lib/utils/response";
+import { requireRoles } from "@/lib/api/auth";
+import { prisma } from "@/lib/db/prisma";
+import { userRolesSchema, userStatusSchema } from "@/lib/validations/admin";
+
+const idOf = (value: string) => { if (!/^\d+$/.test(value)) throw new Error("Invalid user ID"); return BigInt(value); };
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) { try { await requireRoles(["ADMIN"]); const id = idOf((await params).id); const body = await request.json().catch(() => null) as unknown; const status = userStatusSchema.safeParse(body); if (status.success) return apiSuccess(await prisma.user.update({ where: { id }, data: { status: status.data.status }, select: { id: true, name: true, email: true, status: true } }), "User status updated successfully"); const roles = userRolesSchema.safeParse(body); if (roles.success) { const roleRecords = await prisma.role.findMany({ where: { name: { in: roles.data.roleNames } } }); const result = await prisma.$transaction(async (tx) => { await tx.userRole.deleteMany({ where: { userId: id } }); await tx.userRole.createMany({ data: roleRecords.map((role) => ({ userId: id, roleId: role.id })) }); return tx.user.findUnique({ where: { id }, select: { id: true, name: true, email: true, status: true, roles: { include: { role: true } } } }); }); return apiSuccess(result, "User roles updated successfully"); } return apiError("Use either a status or roleNames payload", 422); } catch (e) { return apiError(e instanceof Error ? e.message : "Failed to update user", 400); } }

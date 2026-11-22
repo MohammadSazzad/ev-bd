@@ -1,0 +1,3 @@
+import { prisma } from "@/lib/db/prisma";
+import { ResourcePage } from "@/components/admin/resource-page";
+export default async function AdminArticlesPage() { const rows = await prisma.article.findMany({ include: { category: true, author: { select: { name: true } } }, orderBy: { updatedAt: "desc" } }); return <ResourcePage eyebrow="Editorial" title="Articles" description="Draft, review, publish, and archive the VoltBD editorial library." addHref="/admin/articles/new" addLabel="Write article" rows={rows.map((row) => ({ id: row.id.toString(), title: row.title, subtitle: row.category.name, meta: `${row.author?.name ?? "Unassigned"} · ${row.readTimeMin ?? "—"} min read`, status: row.status }))} />; }
