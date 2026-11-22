@@ -1,0 +1,3 @@
+import { prisma } from "@/lib/db/prisma";
+import { ShowroomForm } from "@/components/admin/showroom-form";
+export default async function NewShowroomPage() { const brands = await prisma.brand.findMany({ where: { status: "PUBLISHED" }, select: { slug: true, name: true }, orderBy: { name: "asc" } }); return <div className="mx-auto max-w-4xl space-y-6"><div><p className="text-sm font-semibold text-emerald-600">Network / Showrooms</p><h1 className="mt-1 text-2xl font-bold">Add showroom</h1><p className="mt-1 text-sm text-slate-500">Create a dealer, importer, or service location.</p></div><ShowroomForm brands={brands} /></div>; }

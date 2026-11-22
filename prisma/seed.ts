@@ -70,6 +70,21 @@ const roles = [
   ["USER", "Standard platform user"],
 ] as const;
 
+const permissions = [
+  ["dashboard.view", "View the operations dashboard"],
+  ["vehicles.view", "View vehicle records"], ["vehicles.create", "Create vehicles"], ["vehicles.update", "Edit vehicles"], ["vehicles.publish", "Publish or archive vehicles"],
+  ["brands.manage", "Manage brands and categories"], ["showrooms.manage", "Manage showrooms and verification"], ["articles.manage", "Manage editorial content"], ["media.manage", "Upload and manage media"],
+  ["users.manage", "Manage user accounts and statuses"], ["roles.manage", "Manage roles and permissions"], ["settings.manage", "Manage platform settings"],
+] as const;
+
+const rolePermissionKeys: Record<string, readonly string[]> = {
+  ADMIN: permissions.map(([key]) => key),
+  EDITOR: ["dashboard.view", "vehicles.view", "vehicles.create", "vehicles.update", "vehicles.publish", "brands.manage", "showrooms.manage", "articles.manage", "media.manage"],
+  MODERATOR: ["dashboard.view", "vehicles.view", "vehicles.publish", "showrooms.manage", "articles.manage", "media.manage"],
+  SHOWROOM: ["dashboard.view", "vehicles.view", "vehicles.create", "vehicles.update", "showrooms.manage", "media.manage"],
+  USER: [],
+};
+
 // Development/demo panel accounts. Change these immediately outside local development.
 const panelUsers = [
   { name: "VoltBD Super Admin", email: "admin@voltbd.com", password: "VoltBD@Admin2026!", role: "ADMIN" },
@@ -77,6 +92,7 @@ const panelUsers = [
   { name: "VoltBD Moderator", email: "moderator@voltbd.com", password: "VoltBD@Moderator2026!", role: "MODERATOR" },
   { name: "VoltBD Showroom Manager", email: "showroom@voltbd.com", password: "VoltBD@Showroom2026!", role: "SHOWROOM" },
 ] as const;
+const seedPanelUsers = process.env.SEED_PANEL_USERS === "true";
 
 const categories = [
   ["Electric Cars", "electric-cars", "Premium electric sedans and SUVs", "CAR"],
@@ -139,15 +155,31 @@ async function main() {
     await prisma.role.upsert({ where: { name }, update: { description }, create: { name, description } });
   }
 
-  for (const panelUser of panelUsers) {
-    const role = await prisma.role.findUniqueOrThrow({ where: { name: panelUser.role } });
-    const user = await prisma.user.upsert({
-      where: { email: panelUser.email },
-      update: { name: panelUser.name, passwordHash: await hashPassword(panelUser.password), status: "ACTIVE", isEmailVerified: true, emailVerifiedAt: new Date() },
-      create: { name: panelUser.name, email: panelUser.email, passwordHash: await hashPassword(panelUser.password), status: "ACTIVE", isEmailVerified: true, emailVerifiedAt: new Date() },
-    });
-    await prisma.userRole.deleteMany({ where: { userId: user.id } });
-    await prisma.userRole.create({ data: { userId: user.id, roleId: role.id } });
+  for (const [key, description] of permissions) {
+    await prisma.permission.upsert({ where: { key }, update: { description }, create: { key, description } });
+  }
+
+  for (const [roleName] of roles) {
+    const role = await prisma.role.findUniqueOrThrow({ where: { name: roleName } });
+    const allowedKeys = [...(rolePermissionKeys[roleName] ?? [])];
+    const allowedPermissions = await prisma.permission.findMany({ where: { key: { in: allowedKeys } }, select: { id: true } });
+    await prisma.rolePermission.deleteMany({ where: { roleId: role.id } });
+    if (allowedPermissions.length) {
+      await prisma.rolePermission.createMany({ data: allowedPermissions.map((permission) => ({ roleId: role.id, permissionId: permission.id })) });
+    }
+  }
+
+  if (seedPanelUsers) {
+    for (const panelUser of panelUsers) {
+      const role = await prisma.role.findUniqueOrThrow({ where: { name: panelUser.role } });
+      const user = await prisma.user.upsert({
+        where: { email: panelUser.email },
+        update: { name: panelUser.name, passwordHash: await hashPassword(panelUser.password), status: "ACTIVE", isEmailVerified: true, emailVerifiedAt: new Date() },
+        create: { name: panelUser.name, email: panelUser.email, passwordHash: await hashPassword(panelUser.password), status: "ACTIVE", isEmailVerified: true, emailVerifiedAt: new Date() },
+      });
+      await prisma.userRole.deleteMany({ where: { userId: user.id } });
+      await prisma.userRole.create({ data: { userId: user.id, roleId: role.id } });
+    }
   }
 
   for (const [name, slug, description, icon] of categories) {
@@ -199,7 +231,7 @@ async function main() {
     await attachArticleImage(saved.id, slug, image);
   }
 
-  console.log(`Seeded ${roles.length} roles, ${panelUsers.length} panel users, ${brands.length} brands with logos, ${vehicles.length} vehicles with galleries, ${showrooms.length} showrooms with covers, and ${articles.length} articles with covers.`);
+  console.log(`Seeded ${roles.length} roles, ${permissions.length} permissions, ${seedPanelUsers ? panelUsers.length : 0} panel users, ${brands.length} brands with logos, ${vehicles.length} vehicles with galleries, ${showrooms.length} showrooms with covers, and ${articles.length} articles with covers.`);
 }
 
 main()

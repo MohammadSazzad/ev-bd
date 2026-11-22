@@ -14,9 +14,13 @@ const globalForPrisma = globalThis as unknown as {
 
 const adapter = new PrismaPg({ connectionString });
 
+// During Next.js development, the global singleton can outlive a generated
+// Prisma Client change. Recreate it when the current schema model is missing.
+const cachedPrisma = globalForPrisma.prisma;
+const hasCurrentSchema = cachedPrisma && "permission" in (cachedPrisma as object);
+
 export const prisma =
-    globalForPrisma.prisma ??
-    new PrismaClient({ adapter });
+    hasCurrentSchema ? cachedPrisma : new PrismaClient({ adapter });
 
 if (process.env.NODE_ENV !== "production") {
     globalForPrisma.prisma = prisma;

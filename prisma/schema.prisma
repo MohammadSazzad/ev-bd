@@ -148,8 +148,34 @@ model Role {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   users UserRole[]
+  permissions RolePermission[]
 
   @@map("roles")
+}
+
+model Permission {
+  id          BigInt  @id @default(autoincrement()) @db.BigInt
+  key         String  @unique @db.VarChar(120)
+  description String? @db.VarChar(255)
+
+  roles RolePermission[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       BigInt @map("role_id") @db.BigInt
+  permissionId BigInt @map("permission_id") @db.BigInt
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@index([permissionId])
+  @@map("role_permissions")
 }
 
 model UserRole {

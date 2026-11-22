@@ -1,0 +1,11 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+export function BrandForm() {
+  const router = useRouter(); const [form, setForm] = useState({ name: "", slug: "", origin: "", category: "", description: "", status: "PUBLISHED" }); const [error, setError] = useState(""); const [saving, setSaving] = useState(false);
+  async function submit(event: React.FormEvent) { event.preventDefault(); setSaving(true); const response = await fetch("/api/v1/admin/brands", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) }); const result = await response.json(); if (!response.ok) setError(result.message ?? "Unable to create brand"); else router.push("/admin/brands"); setSaving(false); }
+  const input = (label: string, key: keyof typeof form) => <label className="space-y-1.5"><span className="text-xs font-semibold">{label}</span><input required={key === "name" || key === "slug"} value={form[key]} onChange={(e) => setForm({ ...form, [key]: e.target.value })} className="w-full rounded-lg border border-slate-200 bg-transparent px-3 py-2.5 text-sm dark:border-slate-700" /></label>;
+  return <form onSubmit={submit} className="space-y-6"><div className="grid gap-5 rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-[#0d1525] sm:grid-cols-2">{input("Brand name", "name")}{input("URL slug", "slug")}{input("Origin", "origin")}{input("Category", "category")}<label className="space-y-1.5 sm:col-span-2"><span className="text-xs font-semibold">Description</span><textarea rows={4} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full rounded-lg border border-slate-200 bg-transparent px-3 py-2.5 text-sm dark:border-slate-700" /></label></div>{error && <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}<div className="flex justify-end gap-3"><button type="button" onClick={() => router.back()} className="rounded-lg border px-4 py-2.5 text-sm font-semibold">Cancel</button><button disabled={saving} className="rounded-lg bg-emerald-500 px-5 py-2.5 text-sm font-bold text-slate-950">{saving ? "Saving..." : "Create brand"}</button></div></form>;
+}

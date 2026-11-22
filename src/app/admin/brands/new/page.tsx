@@ -1,0 +1,2 @@
+import { BrandForm } from "@/components/admin/brand-form";
+export default function NewBrandPage() { return <div className="mx-auto max-w-4xl space-y-6"><div><p className="text-sm font-semibold text-emerald-600">Catalogue / Brands</p><h1 className="mt-1 text-2xl font-bold">Add brand</h1><p className="mt-1 text-sm text-slate-500">Create a manufacturer profile for the public directory.</p></div><BrandForm /></div>; }

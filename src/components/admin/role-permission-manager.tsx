@@ -1,0 +1,16 @@
+"use client";
+
+import { useState } from "react";
+
+type Permission = { id: string; key: string; description: string | null };
+type Role = { id: string; name: string; description: string | null; users: number; permissionKeys: string[] };
+
+export function RolePermissionManager({ roles, permissions }: { roles: Role[]; permissions: Permission[] }) {
+  const [selectedId, setSelectedId] = useState(roles[0]?.id ?? "");
+  const [selected, setSelected] = useState<Record<string, string[]>>(() => Object.fromEntries(roles.map((role) => [role.id, role.permissionKeys])));
+  const [message, setMessage] = useState<string | null>(null);
+  const selectedRole = roles.find((role) => role.id === selectedId);
+  const toggle = (key: string) => setSelected((current) => ({ ...current, [selectedId]: current[selectedId]?.includes(key) ? current[selectedId].filter((item) => item !== key) : [...(current[selectedId] ?? []), key] }));
+  async function save() { const response = await fetch(`/api/v1/admin/roles/${selectedId}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ permissionKeys: selected[selectedId] ?? [] }) }); const result = await response.json(); setMessage(response.ok ? "Permissions saved successfully." : result.message ?? "Unable to save permissions"); }
+  return <div className="grid gap-6 lg:grid-cols-[280px_1fr]"><div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-[#0d1525]"><p className="px-3 pb-3 text-xs font-bold uppercase tracking-wider text-slate-400">Roles</p>{roles.map((role) => <button key={role.id} type="button" onClick={() => { setSelectedId(role.id); setMessage(null); }} className={`mb-1 w-full rounded-lg px-3 py-3 text-left ${selectedId === role.id ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-300" : "hover:bg-slate-50 dark:hover:bg-slate-800"}`}><p className="text-sm font-semibold">{role.name}</p><p className="mt-1 text-xs opacity-70">{role.users} assigned users</p></button>)}</div><div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-[#0d1525]"><div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 dark:border-slate-800"><div><h2 className="font-semibold">{selectedRole?.name ?? "Select a role"} permissions</h2><p className="mt-1 text-xs text-slate-500">ADMIN is always unrestricted as Super Admin.</p></div><button type="button" onClick={save} className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-bold text-slate-950">Save permissions</button></div><div className="grid gap-3 p-5 sm:grid-cols-2">{permissions.map((permission) => <label key={permission.key} className="flex cursor-pointer gap-3 rounded-lg border border-slate-200 p-4 hover:border-emerald-400 dark:border-slate-700"><input type="checkbox" checked={selected[selectedId]?.includes(permission.key) ?? false} onChange={() => toggle(permission.key)} disabled={selectedRole?.name === "ADMIN"} className="mt-0.5 accent-emerald-500" /><span><span className="block text-sm font-semibold">{permission.key}</span><span className="mt-1 block text-xs text-slate-500">{permission.description}</span></span></label>)}</div>{message && <p className="border-t border-slate-200 px-5 py-4 text-sm text-emerald-600 dark:border-slate-800">{message}</p>}</div></div>;
+}

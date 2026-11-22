@@ -44,3 +44,4 @@ export const articleAdminSchema = z.object({
 
 export const userStatusSchema = z.object({ status: z.enum(["ACTIVE", "INACTIVE", "BLOCKED"]) });
 export const userRolesSchema = z.object({ roleNames: z.array(z.enum(["ADMIN", "EDITOR", "MODERATOR", "SHOWROOM", "USER"])).min(1) });
+export const rolePermissionSchema = z.object({ description: z.string().max(255).optional(), permissionKeys: z.array(z.string().min(1)).default([]) });
