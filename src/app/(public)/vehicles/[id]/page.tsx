@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { VehicleDetailsView } from "@/components/vehicle-details/vehicle-details-view";
@@ -15,6 +16,9 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
   const vehicle = getVehicleDetail(id);
+  if (!vehicle) {
+    return { title: "Vehicle Not Found - VoltBD" };
+  }
 
   return {
     title: `${vehicle.name} Price in Bangladesh, Specs & Battery Health - VoltBD`,
@@ -25,6 +29,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function VehicleDetailPage({ params }: PageProps) {
   const { id } = await params;
   const vehicle = getVehicleDetail(id);
+  if (!vehicle) notFound();
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 dark:bg-[#070b14] dark:text-slate-100 transition-colors duration-150 selection:bg-emerald-500/20 selection:text-emerald-600 dark:selection:text-emerald-300">

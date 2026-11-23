@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Plus, X } from "lucide-react";
 import {
@@ -16,6 +17,7 @@ interface ComparisonMatrixProps {
 export function ComparisonMatrix({
   initialVehicleIds = ["byd-atto-3", "mg-zs-ev"],
 }: ComparisonMatrixProps) {
+  const router = useRouter();
   const [selectedIds, setSelectedIds] = useState<string[]>(initialVehicleIds);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
@@ -28,18 +30,31 @@ export function ComparisonMatrix({
   );
 
   const handleAddVehicle = (id: string) => {
+    let nextIds: string[];
     if (selectedIds.length < 3) {
-      setSelectedIds([...selectedIds, id]);
+      nextIds = [...selectedIds, id];
     } else {
-      // Replace last vehicle if 3 are already selected
-      setSelectedIds([selectedIds[0], selectedIds[1], id]);
+      nextIds = [selectedIds[0], selectedIds[1], id];
     }
+    setSelectedIds(nextIds);
+    router.replace(`/compare?vehicles=${nextIds.join(",")}`, { scroll: false });
     setIsAddModalOpen(false);
   };
 
   const handleRemoveVehicle = (id: string) => {
-    setSelectedIds(selectedIds.filter((item) => item !== id));
+    const nextIds = selectedIds.filter((item) => item !== id);
+    setSelectedIds(nextIds);
+    router.replace(nextIds.length ? `/compare?vehicles=${nextIds.join(",")}` : "/compare", { scroll: false });
   };
+
+  useEffect(() => {
+    if (!isAddModalOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsAddModalOpen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [isAddModalOpen]);
 
   return (
     <div className="relative">
@@ -195,8 +210,18 @@ export function ComparisonMatrix({
 
       {/* Add Vehicle Modal / Selector */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="w-full max-w-lg rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0e1628] p-6 shadow-2xl">
+        <div
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setIsAddModalOpen(false);
+          }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150"
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Select vehicle to compare"
+            className="w-full max-w-lg rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0e1628] p-6 shadow-2xl"
+          >
             <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
               <h4 className="text-lg font-bold text-slate-900 dark:text-white">
                 Select Vehicle to Compare

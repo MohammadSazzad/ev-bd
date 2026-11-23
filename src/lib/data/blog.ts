@@ -108,3 +108,9 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: "dhaka-metro-ev-charging-station-blueprint-revealed",
   },
 ];
+
+export function getBlogPost(slug: string): BlogPost | undefined {
+  return FEATURED_POST.slug === slug
+    ? FEATURED_POST
+    : BLOG_POSTS.find((post) => post.slug === slug);
+}

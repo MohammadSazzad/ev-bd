@@ -18,6 +18,7 @@ interface EstimatorInputsProps {
   terrain: TerrainVector;
   setTerrain: (t: TerrainVector) => void;
   onSimulate: () => void;
+  isSimulating?: boolean;
 }
 
 export function EstimatorInputs({
@@ -30,9 +31,11 @@ export function EstimatorInputs({
   terrain,
   setTerrain,
   onSimulate,
+  isSimulating = false,
 }: EstimatorInputsProps) {
   const [isEditingDistance, setIsEditingDistance] = useState(false);
   const [tempDistance, setTempDistance] = useState(dailyDistance.toString());
+  const [distanceError, setDistanceError] = useState("");
 
   const handleModelChange = (id: string) => {
     setModelId(id);
@@ -45,11 +48,12 @@ export function EstimatorInputs({
   const handleDistanceSubmit = () => {
     const val = parseInt(tempDistance, 10);
     if (!isNaN(val) && val > 0 && val <= 500) {
+      setDistanceError("");
       setDailyDistance(val);
+      setIsEditingDistance(false);
     } else {
-      setTempDistance(dailyDistance.toString());
+      setDistanceError("Enter a distance between 1 and 500 km.");
     }
-    setIsEditingDistance(false);
   };
 
   return (
@@ -158,6 +162,11 @@ export function EstimatorInputs({
               </>
             )}
           </div>
+          {distanceError && (
+            <p className="mt-2 text-xs text-rose-600 dark:text-rose-400">
+              {distanceError}
+            </p>
+          )}
         </div>
 
         {/* Field 4: Terrain & Climate Vector */}
@@ -210,9 +219,10 @@ export function EstimatorInputs({
         <button
           type="button"
           onClick={onSimulate}
-          className="w-full mt-2 rounded-xl bg-[#00DF8F] py-3.5 px-4 text-sm font-bold text-[#070b14] transition-all hover:bg-[#00DF8F]/90 active:scale-[0.98] shadow-md shadow-emerald-500/20"
+          disabled={isSimulating}
+          className="w-full mt-2 rounded-xl bg-[#00DF8F] py-3.5 px-4 text-sm font-bold text-[#070b14] transition-all hover:bg-[#00DF8F]/90 active:scale-[0.98] shadow-md shadow-emerald-500/20 disabled:opacity-60"
         >
-          Simulate Degradation & Output
+          {isSimulating ? "Simulating..." : "Simulate Degradation & Output"}
         </button>
       </div>
     </div>

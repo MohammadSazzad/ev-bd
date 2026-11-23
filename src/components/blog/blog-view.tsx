@@ -13,6 +13,7 @@ import { ADS_CONFIG } from "@/lib/config/ads";
 export function BlogView() {
   const [activeCategory, setActiveCategory] = useState<BlogCategory>("All Posts");
   const [currentPage, setCurrentPage] = useState(1);
+  const postsPerPage = 3;
 
   const filteredPosts = useMemo(() => {
     if (activeCategory === "All Posts") {
@@ -20,6 +21,11 @@ export function BlogView() {
     }
     return BLOG_POSTS.filter((post) => post.category === activeCategory);
   }, [activeCategory]);
+  const totalPages = Math.max(1, Math.ceil(filteredPosts.length / postsPerPage));
+  const paginatedPosts = filteredPosts.slice(
+    (currentPage - 1) * postsPerPage,
+    currentPage * postsPerPage
+  );
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 md:py-12">
@@ -54,7 +60,7 @@ export function BlogView() {
             </button>
           </div>
         ) : (
-          filteredPosts.map((post) => <PostCard key={post.id} post={post} />)
+          paginatedPosts.map((post) => <PostCard key={post.id} post={post} />)
         )}
       </div>
 
@@ -69,7 +75,7 @@ export function BlogView() {
       {/* Pagination Controls [ 1 ] [ 2 ] [ 3 ] */}
       <Pagination
         currentPage={currentPage}
-        totalPages={3}
+        totalPages={totalPages}
         onPageChange={setCurrentPage}
       />
     </div>

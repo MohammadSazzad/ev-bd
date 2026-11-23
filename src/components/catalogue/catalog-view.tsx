@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CATALOG_VEHICLES } from "@/lib/data/vehicles";
 import { FiltersSidebar, FilterState } from "./filters-sidebar";
@@ -11,15 +12,30 @@ import { GoogleAdSlot } from "@/components/ads/google-ad-slot";
 import { ADS_CONFIG } from "@/lib/config/ads";
 
 export function CatalogView() {
+  const searchParams = useSearchParams();
+  const query = searchParams.get("q")?.trim().toLowerCase() || "";
+  const brandParam = searchParams.get("brand");
+  const categoryParam = searchParams.get("category");
+  const categoryMap: Record<string, string> = {
+    cars: "Electric Cars",
+    bikes: "Electric Bikes",
+    scooters: "Electric Scooters",
+    cycles: "Electric Cycles",
+  };
+  const initialCategory = categoryParam
+    ? categoryMap[categoryParam] || categoryParam
+    : "Electric Cars";
+
   const [filters, setFilters] = useState<FilterState>({
-    categories: ["Electric Cars"], // Matches reference screenshot checked state
-    brand: "All Brands",
+    categories: categoryParam ? [initialCategory] : query ? [] : ["Electric Cars"],
+    brand: brandParam || "All Brands",
     maxPrice: 10000000,
     minRange: 50,
   });
 
   const [sortBy, setSortBy] = useState<SortOption>("highest-range");
   const [comparedIds, setComparedIds] = useState<string[]>([]);
+
 
   const handleToggleCompare = (id: string) => {
     setComparedIds((prev) =>
@@ -39,6 +55,14 @@ export function CatalogView() {
   // Filter & sort logic
   const filteredVehicles = useMemo(() => {
     return CATALOG_VEHICLES.filter((vehicle) => {
+      if (
+        query &&
+        !`${vehicle.name} ${vehicle.brand} ${vehicle.category}`
+          .toLowerCase()
+          .includes(query)
+      ) {
+        return false;
+      }
       // If categories selected, match category
       if (
         filters.categories.length > 0 &&
@@ -81,7 +105,7 @@ export function CatalogView() {
           return 0;
       }
     });
-  }, [filters, sortBy]);
+  }, [filters, sortBy, query]);
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 md:py-10">

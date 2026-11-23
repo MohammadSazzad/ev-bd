@@ -1,15 +1,45 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { Zap, Menu, X } from "lucide-react";
 import { NAV_ITEMS } from "@/lib/data/homepage";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/auth/me")
+      .then((res) => res.ok)
+      .then((authenticated) => {
+        if (!cancelled) setIsAuthenticated(authenticated);
+      })
+      .catch(() => {
+        if (!cancelled) setIsAuthenticated(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleSignout = async () => {
+    setIsSigningOut(true);
+    try {
+      await fetch("/api/auth/signout", { method: "POST" });
+      setIsAuthenticated(false);
+      setMobileMenuOpen(false);
+      router.replace("/");
+    } finally {
+      setIsSigningOut(false);
+    }
+  };
 
   const isItemActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -56,12 +86,23 @@ export function Navbar() {
         <div className="hidden md:flex items-center gap-3">
           <ThemeToggle />
 
-          <Link
-            href="/login"
-            className="inline-flex items-center justify-center rounded-lg bg-[#00DF8F] px-4 py-1.5 text-sm font-semibold text-[#070b14] transition-all hover:bg-[#00DF8F]/90 active:scale-95 shadow-sm shadow-emerald-500/20"
-          >
-            Login
-          </Link>
+          {isAuthenticated ? (
+            <button
+              type="button"
+              onClick={handleSignout}
+              disabled={isSigningOut}
+              className="inline-flex items-center justify-center rounded-lg bg-[#00DF8F] px-4 py-1.5 text-sm font-semibold text-[#070b14] transition-all hover:bg-[#00DF8F]/90 active:scale-95 shadow-sm shadow-emerald-500/20 disabled:opacity-60"
+            >
+              {isSigningOut ? "Signing out..." : "Logout"}
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              className="inline-flex items-center justify-center rounded-lg bg-[#00DF8F] px-4 py-1.5 text-sm font-semibold text-[#070b14] transition-all hover:bg-[#00DF8F]/90 active:scale-95 shadow-sm shadow-emerald-500/20"
+            >
+              Login
+            </Link>
+          )}
         </div>
 
         {/* Mobile Header Controls */}
@@ -108,13 +149,24 @@ export function Navbar() {
               </p>
               <ThemeToggle showLabels />
             </div>
-            <Link
-              href="/login"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex w-full items-center justify-center rounded-lg bg-[#00DF8F] px-4 py-2.5 text-base font-semibold text-[#070b14] hover:bg-[#00DF8F]/90 shadow-sm"
-            >
-              Login
-            </Link>
+            {isAuthenticated ? (
+              <button
+                type="button"
+                onClick={handleSignout}
+                disabled={isSigningOut}
+                className="flex w-full items-center justify-center rounded-lg bg-[#00DF8F] px-4 py-2.5 text-base font-semibold text-[#070b14] hover:bg-[#00DF8F]/90 shadow-sm disabled:opacity-60"
+              >
+                {isSigningOut ? "Signing out..." : "Logout"}
+              </button>
+            ) : (
+              <Link
+                href="/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex w-full items-center justify-center rounded-lg bg-[#00DF8F] px-4 py-2.5 text-base font-semibold text-[#070b14] hover:bg-[#00DF8F]/90 shadow-sm"
+              >
+                Login
+              </Link>
+            )}
           </div>
         </div>
       )}

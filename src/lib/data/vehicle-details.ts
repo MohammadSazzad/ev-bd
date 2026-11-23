@@ -224,6 +224,52 @@ export const VEHICLE_DETAILS: Record<string, VehicleDetail> = {
     },
   },
 
+  "super-soco-ts": {
+    id: "super-soco-ts",
+    name: "Super Soco TS Street Hunter",
+    brand: "SUPER SOCO",
+    brandSubtitle: "SUPER SOCO BANGLADESH",
+    category: "Electric Bikes",
+    price: 315000,
+    formattedPrice: "৳ 315,000",
+    images: {
+      main: "https://images.unsplash.com/photo-1558980664-769d59546b3d?auto=format&fit=crop&w=1400&q=80",
+      interior: "https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=800&q=80",
+      rear: "https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?auto=format&fit=crop&w=800&q=80",
+      battery: "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=800&q=80",
+    },
+    reliabilityIndex: {
+      score: 92,
+      rating: "High Performance Commuter",
+      note: "Strong city durability with a swappable lithium battery system.",
+      subtitle: "Calculated durability score based on commuter battery parameters",
+    },
+    keySpecs: {
+      battery: "3.24 kWh",
+      realRange: "120 km",
+      chargeTime: "4 hrs AC",
+      motorPower: "3.5 kW",
+    },
+    detailedParameters: {
+      performance: [
+        { label: "Motor Power", value: "3.5 kW" },
+        { label: "Top Speed", value: "80 km/h" },
+        { label: "Acceleration", value: "Sport mode optimized" },
+      ],
+      batteryRange: [
+        { label: "Battery Capacity", value: "3.24 kWh" },
+        { label: "Battery Chemistry", value: "Lithium-Ion" },
+        { label: "Real-world Range", value: "120 km" },
+        { label: "AC Charging Time", value: "Approximately 4 hours" },
+      ],
+      dimensionsWarranty: [
+        { label: "Category", value: "Electric Street Motorcycle" },
+        { label: "Vehicle Warranty", value: "2 Years Official" },
+        { label: "Battery Warranty", value: "3 Years / 40,000 km" },
+      ],
+    },
+  },
+
   "niu-nqi-gts": {
     id: "niu-nqi-gts",
     name: "NIU NQi GTS",
@@ -416,6 +462,6 @@ export const VEHICLE_DETAILS: Record<string, VehicleDetail> = {
   },
 };
 
-export function getVehicleDetail(id: string): VehicleDetail {
-  return VEHICLE_DETAILS[id] || VEHICLE_DETAILS["byd-atto-3"];
+export function getVehicleDetail(id: string): VehicleDetail | undefined {
+  return VEHICLE_DETAILS[id];
 }

@@ -11,7 +11,7 @@ import { ADS_CONFIG } from "@/lib/config/ads";
 export function ShowroomsView() {
   const [selectedDivision, setSelectedDivision] = useState("Dhaka Division");
   const [selectedBrand, setSelectedBrand] = useState("All Brands");
-  const [activeTag, setActiveTag] = useState<string | null>("Dhaka Central");
+  const [activeTag, setActiveTag] = useState<string | null>(null);
   const [selectedShowroomId, setSelectedShowroomId] = useState<string | null>(
     "byd-tejgaon"
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   calculateSimulation,
   TerrainVector,
@@ -10,6 +10,7 @@ import { EstimatorInputs } from "./estimator-inputs";
 import { EstimatorResults } from "./estimator-results";
 import { GoogleAdSlot } from "@/components/ads/google-ad-slot";
 import { ADS_CONFIG } from "@/lib/config/ads";
+import { ESTIMATOR_MODELS } from "@/lib/data/estimator";
 
 export function EstimatorView() {
   const [modelId, setModelId] = useState("byd-atto-3");
@@ -17,6 +18,7 @@ export function EstimatorView() {
   const [dailyDistance, setDailyDistance] = useState(40);
   const [terrain, setTerrain] = useState<TerrainVector>("dhaka-flat");
   const [isSimulating, setIsSimulating] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [result, setResult] = useState<SimulationResult>(() =>
     calculateSimulation("byd-atto-3", "LFP", 40, "dhaka-flat")
@@ -28,16 +30,25 @@ export function EstimatorView() {
     d = dailyDistance,
     t = terrain
   ) => {
+    if (timerRef.current) clearTimeout(timerRef.current);
     setIsSimulating(true);
-    setTimeout(() => {
+    timerRef.current = setTimeout(() => {
       setResult(calculateSimulation(m, c, d, t));
       setIsSimulating(false);
+      timerRef.current = null;
     }, 150);
   };
 
+  useEffect(() => () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+  }, []);
+
   const handleModelChange = (newModelId: string) => {
+    const selected = ESTIMATOR_MODELS.find((model) => model.id === newModelId);
+    const nextChemistry = selected?.defaultChemistry || chemistryId;
     setModelId(newModelId);
-    handleSimulate(newModelId, chemistryId, dailyDistance, terrain);
+    setChemistryId(nextChemistry);
+    handleSimulate(newModelId, nextChemistry, dailyDistance, terrain);
   };
 
   const handleChemistryChange = (newChemId: string) => {
@@ -82,6 +93,7 @@ export function EstimatorView() {
               terrain={terrain}
               setTerrain={handleTerrainChange}
               onSimulate={() => handleSimulate()}
+              isSimulating={isSimulating}
             />
           </div>
 

@@ -49,7 +49,7 @@ export class AuthService {
     await tokenRepository.createToken(user.id, rawToken, TokenType.EMAIL_VERIFICATION, expiresAt);
 
     const baseUrl = process.env.APP_URL || "http://localhost:3000";
-    const verificationUrl = `${baseUrl}/api/auth/verify-email?token=${rawToken}`;
+    const verificationUrl = `${baseUrl}/verify-email?token=${rawToken}`;
 
     // Send verification email
     await mailService.sendVerificationEmail(user.email, user.name, verificationUrl);
